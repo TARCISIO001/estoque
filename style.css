@@ -1,0 +1,173 @@
+/* ================= RESET ================= */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Segoe UI", Tahoma, sans-serif;
+}
+
+/* ================= FUNDO ================= */
+body {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+  color: #fff;
+}
+
+/* ================= LOGIN ================= */
+.login-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.login {
+  background: rgba(255,255,255,0.12);
+  padding: 30px;
+  width: 320px;
+  border-radius: 14px;
+  text-align: center;
+  box-shadow: 0 12px 25px rgba(0,0,0,0.4);
+}
+
+.login h2 {
+  margin-bottom: 20px;
+}
+
+.login input {
+  width: 100%;
+  padding: 12px;
+  border-radius: 6px;
+  border: none;
+  margin: 8px 0;
+}
+
+.login button {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 6px;
+  background: linear-gradient(45deg, #00c6ff, #0072ff);
+  color: #fff;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+/* ================= SISTEMA ================= */
+.sistema {
+  padding: 20px;
+}
+
+.titulo {
+  text-align: center;
+  margin-bottom: 25px;
+  font-size: 32px;
+}
+
+/* ================= GRID (2 POR LINHA) ================= */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* DUAS CAIXAS POR LINHA */
+  gap: 20px;
+}
+
+/* ================= BOX ================= */
+.box {
+  background: rgba(255,255,255,0.1);
+  padding: 20px;
+  border-radius: 16px;
+  box-shadow: 0 10px 22px rgba(0,0,0,0.35);
+  display: flex;
+  flex-direction: column;
+}
+
+.box h2 {
+  text-align: center;
+  margin-bottom: 10px;
+  font-size: 18px;
+}
+
+.box h3 {
+  text-align: center;
+  margin-bottom: 10px;
+  color: red;
+}
+
+/* ================= FORM ================= */
+.form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.form input {
+  flex: 1 1 48%;
+  padding: 8px;
+  border-radius: 6px;
+  border: none;
+}
+
+.form button {
+  flex: 1 1 100%;
+  padding: 10px;
+  border: none;
+  border-radius: 6px;
+  background: #28a745;
+  color: #fff;
+  cursor: pointer;
+}
+
+/* ================= TABLE ================= */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  font-size: 14px;
+}
+
+thead {
+  background: rgba(0,0,0,0.35);
+}
+
+th, td {
+  padding: 8px;
+  text-align: center;
+  border-bottom: 1px solid rgba(255,255,255,0.15);
+}
+
+/* ================= BOTÕES ================= */
+td button {
+  padding: 4px 8px;
+  margin: 0 2px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+td button:nth-child(1) {
+  background: #28a745;
+  color: #fff;
+}
+
+td button:nth-child(2) {
+  background: #ffc107;
+  color: #000;
+}
+
+td button:nth-child(3) {
+  background: #dc3545;
+  color: #fff;
+}
+
+/* ================= RESPONSIVO ================= */
+@media (max-width: 900px) {
+  .grid {
+    grid-template-columns: 1fr; /* UMA POR LINHA NO CELULAR */
+  }
+
+  .titulo {
+    font-size: 24px;
+  }
+}
+

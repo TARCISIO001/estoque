@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Controle de Estoque</title>
+
+  <link rel="stylesheet" href="style.css">
+
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+</head>
+
+<body class="login-page">
+
+<div id="login" class="login">
+  <h2>BEM VINDO AO ESTOQUE</h2>
+  <input type="text" id="usuario" placeholder="Usuário">
+  <input type="password" id="senha" placeholder="Senha">
+  <button onclick="login()">Entrar</button>
+</div>
+
+<div id="sistema" class="sistema" style="display:none">
+  <h1 class="titulo">CONTROLE DE ESTOQUE</h1>
+
+  <div id="areaAdmin" style="display:none; margin-bottom: 20px;">
+    <h3>Usuários Cadastrados</h3>
+
+<div id="areaLogs" style="display:none">
+  <h3>Logs de Alterações</h3>
+  <table border="1">
+    <thead>
+      <tr>
+        <th>Usuário</th>
+        <th>Ação</th>
+        <th>Detalhes</th>
+        <th>Data</th>
+      </tr>
+    </thead>
+    <tbody id="listaLogs"></tbody>
+  </table>
+</div>
+
+
+<table>
+  <thead>
+    <tr>
+      <th>Usuário</th>
+      <th>Tipo</th>
+      <th>Ações</th>
+    </tr>
+  </thead>
+  <tbody id="listaUsuarios"></tbody>
+</table>
+
+  <h3>Cadastro de Usuários</h3>
+  <button onclick="criarUsuario()">➕ Criar Usuário</button>
+</div>
+
+
+  <div class="grid">
+
+
+
+
+    <!-- ENTRADA -->
+    <div class="box">
+<h2>ENTRADA ESTOQUE</h2>
+<button onclick="addEntrada()">Adicionar</button>
+<table>
+<thead><tr><th>Data</th><th>Nome</th><th>Qtd</th><th>Ações</th></tr></thead>
+<tbody id="estoque"></tbody>
+</table>
+</div>
+
+<div class="box">
+<h2>SAÍDA ESTOQUE</h2>
+<button onclick="addSaida()">Adicionar</button>
+<table>
+<thead><tr><th>Data</th><th>Nome</th><th>Qtd</th><th>Ações</th></tr></thead>
+<tbody id="saida"></tbody>
+</table>
+</div>
+
+<div class="box">
+<h2>LABORATÓRIO</h2>
+<button onclick="addLaboratorio()">Adicionar</button>
+<table>
+<thead><tr><th>Data</th><th>Nome</th><th>Qtd</th><th>Ações</th></tr></thead>
+<tbody id="laboratorio"></tbody>
+</table>
+</div>
+
+<div class="box">
+<h2>DÍVIDAS</h2>
+<h3>Saldo: R$ <span id="totalDividas">0.00</span></h3>
+<button onclick="addDivida()">Adicionar</button>
+<table>
+<thead><tr><th>Data</th><th>Nome</th><th>Valor</th><th>Ações</th></tr></thead>
+<tbody id="dividas"></tbody>
+</table>
+</div>
+
+</div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
