@@ -50,10 +50,14 @@ function login() {
       document.getElementById("sistema").style.display = "block";
 
       // área admin
-      if(usuarioLogado.tipo === "master"){
-        document.getElementById("areaAdmin").style.display = "block";
-        carregarUsuarios(); // ✅ AGORA SIM
-      }
+     if(usuarioLogado.tipo === "master"){
+  document.getElementById("areaAdmin").style.display = "block";
+  document.getElementById("areaLogs").style.display = "block";
+
+  carregarUsuarios();
+  carregarLogs();
+}
+
 
       // carrega dados
       carregarEstoque();
@@ -81,7 +85,14 @@ if(!validarNome(nome)) return;
   const qtd = Number(prompt("Qtd:"));
   if(!data || !nome || qtd <= 0) return;
 
-  db.collection("estoque").add({ data, nome, quantidade: qtd });
+ db.collection("estoque")
+  .add({ data, nome, quantidade: qtd })
+  .then(() => {
+    registrarLog(
+      "Entrada de estoque",
+      `Material: ${nome}, Quantidade: ${qtd}`
+    );
+  });
 }
 
 function carregarEstoque(){
@@ -110,7 +121,16 @@ function alterarEstoque(id, v){
   r.get().then(d => {
     let n = d.data().quantidade + v;
     if(n < 0) return;
-    r.update({ quantidade: n });
+let acao = v > 0 ? "Aumentou" : "Diminuiu";
+
+r.update({ quantidade: n }).then(() => {
+  registrarLog(
+    "Estoque",
+    `${acao} estoque | ID: ${id} | Nova qtd: ${n}`
+  );
+});
+
+
   });
 }
 
@@ -137,7 +157,15 @@ if(!validarNome(nome)) return;
     db.collection("estoque").doc(e.id)
       .update({ quantidade: e.data().quantidade - qtd });
 
-    db.collection("saida").add({ data, nome, quantidade: qtd });
+   db.collection("saida")
+  .add({ data, nome, quantidade: qtd })
+  .then(() => {
+    registrarLog(
+      "Saída",
+      `Retirou ${qtd} de ${nome}`
+    );
+  });
+
   });
 }
 
@@ -243,15 +271,19 @@ function alterarLaboratorio(id, v){
 // DÍVIDAS
 // ======================
 function addDivida(){
+  if(usuarioLogado?.tipo !== "master"){
+    alert("Somente o administrador pode adicionar dívidas");
+    return;
+  }
+
   let data = prompt("Data (DDMMAAAA):");
   data = formatarData(data);
   if(!data) return;
 
-const n = prompt("Nome:");
-if(!validarNome(n)) return;
+  const n = prompt("Nome:");
+  if(!validarNome(n)) return;
 
   const v = Number(prompt("Valor:"));
-
   if(!n || v <= 0) return;
 
   db.collection("dividas").add({
@@ -263,28 +295,40 @@ if(!validarNome(n)) return;
 
 
 function carregarDividas(){
-  dividas.innerHTML="";
-  let total=0;
+  dividas.innerHTML = "";
+  let total = 0;
 
-  db.collection("dividas").onSnapshot(s=>{
-    dividas.innerHTML="";
-    total=0;
+  db.collection("dividas").onSnapshot(snapshot => {
+    dividas.innerHTML = "";
+    total = 0;
 
-    s.forEach(d=>{
-      const i=d.data();
-      total+=i.valor;
+    snapshot.forEach(d => {
+      const i = d.data();
+      total += i.valor;
 
-      dividas.innerHTML+=`
+      dividas.innerHTML += `
       <tr>
         <td>${i.data}</td>
         <td>${i.nome}</td>
-        <td contenteditable onblur="editarDivida('${d.id}',this.innerText)">
+
+        <td ${
+          usuarioLogado?.tipo === "master"
+            ? `contenteditable onblur="editarDivida('${d.id}', this.innerText)"`
+            : ""
+        }>
           ${i.valor.toFixed(2)}
         </td>
+
         <td>
-          <button onclick="editarDivida('${d.id}',1,true)">➕</button>
-          <button onclick="editarDivida('${d.id}',-1,true)">➖</button>
-          <button onclick="excluir('dividas','${d.id}')">🗑️</button>
+          ${
+            usuarioLogado?.tipo === "master"
+              ? `
+                <button onclick="editarDivida('${d.id}',1,true)">➕</button>
+                <button onclick="editarDivida('${d.id}',-1,true)">➖</button>
+                <button onclick="excluir('dividas','${d.id}')">🗑️</button>
+              `
+              : '👁️'
+          }
         </td>
       </tr>`;
     });
@@ -293,21 +337,48 @@ function carregarDividas(){
   });
 }
 
-function editarDivida(id,v,inc){
-  const r=db.collection("dividas").doc(id);
+
+function editarDivida(id, v, inc){
+  if(usuarioLogado?.tipo !== "master"){
+    alert("Somente o administrador pode alterar dívidas");
+    return;
+  }
+
+  const r = db.collection("dividas").doc(id);
+
   r.get().then(d=>{
     let n = inc ? d.data().valor + v : Number(v);
     if(n < 0) n = 0;
-    r.update({ valor: n });
+   r.update({ valor: n }).then(()=>{
+  registrarLog(
+    "Alteração dívida",
+    `ID: ${id}, Novo valor: ${n}`
+  );
+});
+
   });
 }
 
 // ======================
 // EXCLUIR
 // ======================
-function excluir(c,id){
-  if(confirm("Excluir?")) db.collection(c).doc(id).delete();
+function excluir(c, id){
+  if(c === "dividas" && usuarioLogado?.tipo !== "master"){
+    alert("Somente o administrador pode excluir dívidas");
+    return;
+  }
+
+  if(confirm("Excluir?")){
+    db.collection(c).doc(id).delete().then(()=>{
+      registrarLog(
+        "Exclusão",
+        `Excluiu registro da coleção ${c} (ID: ${id})`
+      );
+    });
+  }
 }
+
+
 
 // FORMATO DATA
 // ======================
@@ -404,3 +475,118 @@ function excluirUsuario(id){
   }
 }
 
+// ======================
+// CARREGAR LOGS
+// ======================
+function carregarLogs(){
+  const lista = document.getElementById("listaLogs");
+  if(!lista) return;
+
+  db.collection("logs")
+    .orderBy("dataCriacao", "desc")
+    .onSnapshot(snapshot=>{
+      lista.innerHTML = "";
+
+      snapshot.forEach(doc=>{
+        const l = doc.data();
+        let classe = "";
+
+        if(l.acao.includes("Entrada") || l.acao.includes("Aumentou"))
+          classe = "log-add";
+        else if(l.acao.includes("Saída") || l.acao.includes("Diminuiu"))
+          classe = "log-rem";
+        else if(l.acao.includes("Exclusão"))
+          classe = "log-del";
+
+        lista.innerHTML += `
+          <tr class="${classe}">
+            <td>${l.usuario}</td>
+            <td>${l.acao}</td>
+            <td>${l.detalhes}</td>
+            <td>${l.data}</td>
+          </tr>
+        `;
+      });
+    });
+}
+
+
+
+
+
+function registrarLog(acao, detalhes){
+  db.collection("logs").add({
+    usuario: usuarioLogado?.usuario || "desconhecido",
+    tipoUsuario: usuarioLogado?.tipo || "desconhecido",
+    acao: acao,
+    detalhes: detalhes,
+    data: new Date().toLocaleString("pt-BR"),
+    dataCriacao: firebase.firestore.FieldValue.serverTimestamp()
+  });
+}
+
+
+function alterarSenhaMaster(){
+  if(usuarioLogado?.tipo !== "master"){
+    alert("Acesso negado");
+    return;
+  }
+
+  const novaSenha = prompt("Digite a nova senha do MASTER:");
+  if(!novaSenha || novaSenha.length < 4){
+    alert("Senha muito curta");
+    return;
+  }
+
+  db.collection("usuarios")
+    .doc(usuarioLogado.id)
+    .update({ senha: novaSenha })
+    .then(()=>{
+      registrarLog("Segurança", "Senha do MASTER alterada");
+      alert("Senha alterada com sucesso");
+    });
+}
+/*ALTERAR LOGIN MASTER */
+function alterarLoginMaster(){
+  if(usuarioLogado?.tipo !== "master"){
+    alert("Acesso negado");
+    return;
+  }
+
+  const novoUsuario = prompt("Novo login do MASTER:");
+  if(!novoUsuario || novoUsuario.length < 3){
+    alert("Login inválido");
+    return;
+  }
+
+  db.collection("usuarios")
+    .doc(usuarioLogado.id)
+    .update({ usuario: novoUsuario })
+    .then(()=>{
+      registrarLog("Segurança", "Login do MASTER alterado");
+      usuarioLogado.usuario = novoUsuario;
+      alert("Login alterado com sucesso");
+    });
+}
+
+/*ALTERAR SENHA MASTER*/
+function alterarSenhaMaster(){
+  if(usuarioLogado?.tipo !== "master"){
+    alert("Acesso negado");
+    return;
+  }
+
+  const novaSenha = prompt("Nova senha do MASTER:");
+  if(!novaSenha || novaSenha.length < 4){
+    alert("Senha muito curta");
+    return;
+  }
+
+  db.collection("usuarios")
+    .doc(usuarioLogado.id)
+    .update({ senha: novaSenha })
+    .then(()=>{
+      registrarLog("Segurança", "Senha do MASTER alterada");
+      alert("Senha alterada com sucesso");
+    });
+}
