@@ -53,6 +53,8 @@ function login() {
      if(usuarioLogado.tipo === "master"){
   document.getElementById("areaAdmin").style.display = "block";
   document.getElementById("areaLogs").style.display = "block";
+  document.getElementById("areaMasterConfig").style.display = "block";
+
 
   carregarUsuarios();
   carregarLogs();
@@ -590,3 +592,4 @@ function alterarSenhaMaster(){
       alert("Senha alterada com sucesso");
     });
 }
+
