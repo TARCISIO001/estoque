@@ -1,9 +1,6 @@
- .titulo {
-    font-size: 24px;
-  }
-
-
-/* ================= RESET ================= */
+/* =================================================
+   RESET GLOBAL
+================================================= */
 * {
   margin: 0;
   padding: 0;
@@ -11,14 +8,24 @@
   font-family: "Segoe UI", Tahoma, sans-serif;
 }
 
-/* ================= FUNDO ================= */
-body {
-  min-height: 100vh;
-  background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-  color: #fff;
+html, body {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
-/* ================= LOGIN ================= */
+/* =================================================
+   FUNDO GERAL
+================================================= */
+body {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0f172a, #020617);
+  color: #e5e7eb;
+}
+
+/* =================================================
+   LOGIN
+================================================= */
 .login-page {
   display: flex;
   align-items: center;
@@ -26,12 +33,13 @@ body {
 }
 
 .login {
-  background: rgba(255,255,255,0.12);
-  padding: 30px;
+  background: #020617;
   width: 320px;
+  padding: 25px;
   border-radius: 14px;
   text-align: center;
-  box-shadow: 0 12px 25px rgba(0,0,0,0.4);
+  border: 1px solid #1e293b;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.6);
 }
 
 .login h2 {
@@ -41,353 +49,197 @@ body {
 .login input {
   width: 100%;
   padding: 12px;
-  border-radius: 6px;
-  border: none;
   margin: 8px 0;
+  border-radius: 6px;
+  border: 1px solid #1e293b;
+  background: #020617;
+  color: #e5e7eb;
+}
+
+.login input::placeholder {
+  color: #64748b;
 }
 
 .login button {
   width: 100%;
   padding: 12px;
-  border: none;
+  margin-top: 10px;
   border-radius: 6px;
-  background: linear-gradient(45deg, #00c6ff, #0072ff);
-  color: #fff;
-  font-size: 16px;
+  border: none;
   cursor: pointer;
+  font-weight: 600;
+  background: linear-gradient(45deg, #2563eb, #1d4ed8);
+  color: #fff;
 }
 
-/* ================= SISTEMA ================= */
+/* =================================================
+   SISTEMA
+================================================= */
 .sistema {
-  padding: 20px;
+  padding: 16px;
 }
 
 .titulo {
   text-align: center;
   margin-bottom: 25px;
-  font-size: 32px;
+  font-size: 28px;
+  color: #f8fafc;
 }
 
-/* ================= GRID (2 POR LINHA) ================= */
+/* =================================================
+   GRID
+================================================= */
 .grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr); /* DUAS CAIXAS POR LINHA */
-  gap: 20px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  width: 100%;
 }
 
-/* ================= BOX ================= */
+/* =================================================
+   BOX (CARTÕES)
+================================================= */
 .box {
-  background: rgba(255,255,255,0.1);
-  padding: 20px;
-  border-radius: 16px;
-  box-shadow: 0 10px 22px rgba(0,0,0,0.35);
-  display: flex;
-  flex-direction: column;
-  overflow-x: auto;
+  background: #020617;
+  border-radius: 14px;
+  padding: 14px;
+  border: 1px solid #1e293b;
+  box-shadow: 0 0 0 1px rgba(148,163,184,.12);
 }
 
 .box h2 {
   text-align: center;
-  margin-bottom: 10px;
   font-size: 18px;
+  margin-bottom: 8px;
 }
 
 .box h3 {
   text-align: center;
   margin-bottom: 10px;
-  color: red;
+  color: #f87171;
 }
 
-/* ================= FORM ================= */
-.form {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 10px;
-}
-
-.form input {
-  flex: 1 1 48%;
-  padding: 8px;
-  border-radius: 6px;
-  border: none;
-}
-
-.form button {
-  flex: 1 1 100%;
-  padding: 10px;
-  border: none;
-  border-radius: 6px;
-  background: #28a745;
-  color: #fff;
-  cursor: pointer;
-}
-
-/* ================= TABLE ================= */
-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 10px;
-  font-size: 14px;
-}
-
-thead {
-  background: rgba(0,0,0,0.35);
-}
-
-th, td {
-  padding: 8px;
-  text-align: center;
-  border-bottom: 1px solid rgba(255,255,255,0.15);
-}
-
-/* ================= BOTÕES ================= */
-td button {
-  padding: 4px 8px;
-  margin: 0 2px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
-}
-
-td button:nth-child(1) {
-  background: #28a745;
-  color: #fff;
-}
-
-td button:nth-child(2) {
-  background: #ffc107;
-  color: #000;
-}
-
-td button:nth-child(3) {
-  background: #dc3545;
-  color: #fff;
-}
-
-/* ================= RESPONSIVO ================= */
-@media (max-width: 900px) {
-  .grid {
-    grid-template-columns: 1fr; /* UMA POR LINHA NO CELULAR */
-  }
-
-  .titulo {
-    font-size: 24px;
-  }
-}
-
-/*css logs/*
-
-/* ===== LOGS ===== */
-/* ===== LOGS ===== */
-#areaLogs {
-  max-height: 300px;        /* barra de rolagem */
-  overflow-y: auto;
-  margin-top: 20px;
-}
-
-.log-entrada,
-.log-aumentou {
-  background-color: #e6fffa; /* verde claro */
-  color: #065f46;
-}
-
-.log-saida,
-.log-diminuiu {
-  background-color: #fff7ed; /* laranja claro */
-  color: #7c2d12;
-}
-
-.log-exclusao {
-  background-color: #fee2e2; /* vermelho claro */
-  color: #7f1d1d;
-}
-
-.log-divida {
-  background-color: #eff6ff; /* azul claro */
-  color: #1e3a8a;
-}
-
-#areaLogs table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-#areaLogs th, #areaLogs td {
-  padding: 6px;
-  font-size: 14px;
-}
-
-/* ==========================
-   VISUAL PROFISSIONAL ESCURO
-========================== */
-
-/* Fundo geral */
-body {
-  background: linear-gradient(135deg, #364872, #020617);
-  color: #e5e7eb;
-  font-family: 'Segoe UI', Tahoma, sans-serif;
-}
-
-/* Títulos */
-h1, h2, h3 {
-  color: #f8fafc;
-}
-
-/* Boxes (cartões) */
-.box {
-  background: #020617;
-  border: 1px solid #1e293b;
-  border-radius: 12px;
-  padding: 15px;
-  box-shadow: 0 0 0 1px rgba(148,163,184,.15);
-}
-
-/* Grid */
-.grid {
-  gap: 18px;
-}
-
-/* Botões */
+/* =================================================
+   BOTÕES
+================================================= */
 button {
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
   background: #1e293b;
   color: #e5e7eb;
-  border: none;
-  border-radius: 6px;
-  padding: 6px 10px;
-  font-weight: 600;
 }
 
 button:hover {
   background: #334155;
 }
 
-/* Botões específicos */
-button[onclick*="➕"] { background: #14532d; }
-button[onclick*="➖"] { background: #7f1d1d; }
-button[onclick*="🗑️"] { background: #334155; }
+td button {
+  margin: 2px;
+}
 
-/* Tabelas */
+td button:nth-child(1) { background: #166534; }
+td button:nth-child(2) { background: #92400e; }
+td button:nth-child(3) { background: #7f1d1d; }
+
+/* =================================================
+   TABELAS
+================================================= */
+.table-scroll {
+  width: 100%;
+  overflow-x: auto;
+}
+
 table {
   width: 100%;
+  min-width: 600px;
   border-collapse: collapse;
   font-size: 14px;
-  margin-top: 10px;
+  margin-top: 8px;
 }
 
-th {
+thead {
   background: #020617;
-  color: #e5e7eb;
-  padding: 8px;
-  position: sticky;
-  top: 0;
-  border-bottom: 1px solid #1e293b;
 }
 
-td {
+th, td {
   padding: 8px;
+  text-align: center;
   border-bottom: 1px solid #1e293b;
+  white-space: nowrap;
 }
 
-/* Linha hover */
 tr:hover {
-  background: #020617;
+  background: rgba(255,255,255,0.03);
 }
 
-/* Logs com rolagem */
-#areaLogs table {
-  max-height: 260px;
+/* =================================================
+   ADMIN / LOGS
+================================================= */
+#areaAdmin, #areaLogs {
+  margin-top: 20px;
+}
+
+#areaLogs {
+  max-height: 300px;
   overflow-y: auto;
-  display: block;
-}
-
-/* Cores nos logs */
-.log-add    { color: #22c55e; }
-.log-rem    { color: #f87171; }
-.log-del    { color: #cbd5f5; }
-
-/* Login */
-.login {
-  background: #020617;
   border: 1px solid #1e293b;
-  border-radius: 10px;
-  padding: 25px;
+  border-radius: 8px;
+  padding: 8px;
 }
 
-/* Inputs */
-input {
-  background: #020617;
-  color: #e5e7eb;
-  border: 1px solid #1e293b;
+#areaLogs table {
+  min-width: 800px;
 }
 
-input::placeholder {
-  color: #64748b;
+/* =================================================
+   CORES DOS LOGS
+================================================= */
+.log-entrada,
+.log-aumentou {
+  background: rgba(34,197,94,0.15);
 }
 
-/* Mobile */
-@media (max-width: 768px) {
-  .grid {
-    grid-template-columns: 1fr;
-  }
+.log-saida,
+.log-diminuiu {
+  background: rgba(251,146,60,0.15);
 }
 
-/* ==========================
-   MOBILE SEGURO (SEM QUEBRAR)
-   ========================== */
+.log-exclusao {
+  background: rgba(239,68,68,0.15);
+}
+
+.log-divida {
+  background: rgba(59,130,246,0.15);
+}
+
+/* =================================================
+   RESPONSIVO MOBILE
+================================================= */
 @media (max-width: 768px) {
 
-  /* Containers */
-  body {
-    padding: 5px;
+  .titulo {
+    font-size: 22px;
   }
 
-  .sistema {
-    padding: 5px;
-  }
-
-  /* Grid vira coluna */
   .grid {
     display: flex;
     flex-direction: column;
-    gap: 12px;
   }
 
-  /* Caixas */
   .box {
-    padding: 10px;
+    padding: 12px;
   }
 
-  /* Botões maiores e organizados */
   button {
     font-size: 15px;
     padding: 8px 10px;
   }
 
-  /* Admin */
-  #areaAdmin button {
-    width: 100%;
-    margin-bottom: 8px;
-  }
-
-  /* Logs: APENAS ROLAGEM */
-  #areaLogs {
-    margin-top: 15px;
-    padding: 8px;
-  }
-
-  #areaLogs table {
-    width: 100%;
-    overflow-x: auto;
-    display: block;
-  }
-
-  /* Qualquer tabela do sistema */
   table {
-    width: 100%;
-    overflow-x: auto;
-    display: block;
+    min-width: 650px;
   }
-}
 
+}
