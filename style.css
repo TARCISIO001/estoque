@@ -207,3 +207,77 @@ th, td {
     font-size: 32px;
   }
 }
+
+/* ===============================
+   MOBILE: TABELA → CARD
+=============================== */
+@media (max-width: 900px) {
+
+  /* Esconde cabeçalho */
+  table thead {
+    display: none;
+  }
+
+  table {
+    min-width: 100%;
+  }
+
+  table tbody tr {
+    display: block;
+    background: rgba(255,255,255,0.12);
+    margin-bottom: 12px;
+    border-radius: 10px;
+    padding: 10px;
+  }
+
+  table td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 4px;
+    border: none;
+    font-size: 14px;
+  }
+
+  table td::before {
+    font-weight: bold;
+    color: #ffd166;
+  }
+
+  /* Labels automáticos */
+  #estoque td:nth-child(1)::before,
+  #saida td:nth-child(1)::before,
+  #laboratorio td:nth-child(1)::before,
+  #dividas td:nth-child(1)::before {
+    content: "Data";
+  }
+
+  #estoque td:nth-child(2)::before,
+  #saida td:nth-child(2)::before,
+  #laboratorio td:nth-child(2)::before,
+  #dividas td:nth-child(2)::before {
+    content: "Nome";
+  }
+
+  #estoque td:nth-child(3)::before,
+  #saida td:nth-child(3)::before,
+  #laboratorio td:nth-child(3)::before {
+    content: "Qtd";
+  }
+
+  #dividas td:nth-child(3)::before {
+    content: "Valor";
+  }
+
+  #estoque td:nth-child(4)::before,
+  #saida td:nth-child(4)::before,
+  #laboratorio td:nth-child(4)::before,
+  #dividas td:nth-child(4)::before {
+    content: "Ações";
+  }
+
+  /* Ações alinhadas */
+  td button {
+    margin: 0 3px;
+  }
+}
