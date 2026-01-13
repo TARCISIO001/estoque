@@ -1,7 +1,7 @@
  .titulo {
     font-size: 24px;
   }
-}
+
 
 /* ================= RESET ================= */
 * {
@@ -177,5 +177,158 @@ td button:nth-child(3) {
   }
 }
 
+/*css logs/*
 
+/* ===== LOGS ===== */
+/* ===== LOGS ===== */
+#areaLogs {
+  max-height: 300px;        /* barra de rolagem */
+  overflow-y: auto;
+  margin-top: 20px;
+}
 
+.log-entrada,
+.log-aumentou {
+  background-color: #e6fffa; /* verde claro */
+  color: #065f46;
+}
+
+.log-saida,
+.log-diminuiu {
+  background-color: #fff7ed; /* laranja claro */
+  color: #7c2d12;
+}
+
+.log-exclusao {
+  background-color: #fee2e2; /* vermelho claro */
+  color: #7f1d1d;
+}
+
+.log-divida {
+  background-color: #eff6ff; /* azul claro */
+  color: #1e3a8a;
+}
+
+#areaLogs table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+#areaLogs th, #areaLogs td {
+  padding: 6px;
+  font-size: 14px;
+}
+
+/* ==========================
+   VISUAL PROFISSIONAL ESCURO
+========================== */
+
+/* Fundo geral */
+body {
+  background: linear-gradient(135deg, #364872, #020617);
+  color: #e5e7eb;
+  font-family: 'Segoe UI', Tahoma, sans-serif;
+}
+
+/* Títulos */
+h1, h2, h3 {
+  color: #f8fafc;
+}
+
+/* Boxes (cartões) */
+.box {
+  background: #020617;
+  border: 1px solid #1e293b;
+  border-radius: 12px;
+  padding: 15px;
+  box-shadow: 0 0 0 1px rgba(148,163,184,.15);
+}
+
+/* Grid */
+.grid {
+  gap: 18px;
+}
+
+/* Botões */
+button {
+  background: #1e293b;
+  color: #e5e7eb;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-weight: 600;
+}
+
+button:hover {
+  background: #334155;
+}
+
+/* Botões específicos */
+button[onclick*="➕"] { background: #14532d; }
+button[onclick*="➖"] { background: #7f1d1d; }
+button[onclick*="🗑️"] { background: #334155; }
+
+/* Tabelas */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  margin-top: 10px;
+}
+
+th {
+  background: #020617;
+  color: #e5e7eb;
+  padding: 8px;
+  position: sticky;
+  top: 0;
+  border-bottom: 1px solid #1e293b;
+}
+
+td {
+  padding: 8px;
+  border-bottom: 1px solid #1e293b;
+}
+
+/* Linha hover */
+tr:hover {
+  background: #020617;
+}
+
+/* Logs com rolagem */
+#areaLogs table {
+  max-height: 260px;
+  overflow-y: auto;
+  display: block;
+}
+
+/* Cores nos logs */
+.log-add    { color: #22c55e; }
+.log-rem    { color: #f87171; }
+.log-del    { color: #cbd5f5; }
+
+/* Login */
+.login {
+  background: #020617;
+  border: 1px solid #1e293b;
+  border-radius: 10px;
+  padding: 25px;
+}
+
+/* Inputs */
+input {
+  background: #020617;
+  color: #e5e7eb;
+  border: 1px solid #1e293b;
+}
+
+input::placeholder {
+  color: #64748b;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
