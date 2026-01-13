@@ -332,3 +332,76 @@ input::placeholder {
     grid-template-columns: 1fr;
   }
 }
+
+/* ==========================
+   AJUSTES MOBILE (ADMIN / LOGS)
+   ========================== */
+
+@media (max-width: 768px) {
+
+  /* Área Admin */
+  #areaAdmin {
+    padding: 10px;
+  }
+
+  #areaAdmin h3 {
+    text-align: center;
+    margin-bottom: 10px;
+  }
+
+  /* Botões do master */
+  #areaAdmin button {
+    width: 100%;
+    margin-bottom: 8px;
+    font-size: 15px;
+    padding: 10px;
+  }
+
+  /* Área de logs */
+  #areaLogs {
+    margin-top: 15px;
+    background: rgba(0,0,0,0.25);
+    padding: 10px;
+    border-radius: 8px;
+  }
+
+  /* Scroll horizontal para tabela */
+  #areaLogs table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+    font-size: 14px;
+  }
+
+  #areaLogs th,
+  #areaLogs td {
+    padding: 6px 8px;
+  }
+
+  /* Tabela usuários */
+  #listaUsuarios {
+    display: block;
+    width: 100%;
+  }
+
+  #listaUsuarios tr {
+    display: block;
+    background: rgba(255,255,255,0.08);
+    margin-bottom: 8px;
+    border-radius: 6px;
+  }
+
+  #listaUsuarios td {
+    display: block;
+    width: 100%;
+    text-align: center;
+    padding: 6px;
+  }
+
+  /* Tabelas principais em scroll */
+  table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+}
