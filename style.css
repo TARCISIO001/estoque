@@ -1,283 +1,201 @@
-/* =========================
-   RESET GLOBAL
-========================= */
+/* ================= RESET ================= */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: "Segoe UI", Tahoma, sans-serif;
+  font-family: "Segoe UI", Roboto, sans-serif;
 }
 
-html, body {
-  width: 100%;
-  max-width: 100%;
-  overflow-x: hidden; /* IMPEDE QUALQUER DESLOCAMENTO */
-}
-
-/* =========================
-   FUNDO GERAL
-========================= */
+/* ================= FUNDO ================= */
 body {
   min-height: 100vh;
-  background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-  color: #fff;
+  background: linear-gradient(135deg, #020617, #020617);
+  color: #e5e7eb;
 }
 
-/* =========================
-   LOGIN
-========================= */
+/* ================= LOGIN ================= */
 .login-page {
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 12px;
 }
 
 .login {
-  background: rgba(255,255,255,0.12);
-  padding: 25px;
   width: 100%;
-  max-width: 320px;
+  max-width: 360px;
+  background: #020617;
+  border: 1px solid #1e293b;
   border-radius: 14px;
-  text-align: center;
-  box-shadow: 0 12px 25px rgba(0,0,0,0.4);
+  padding: 24px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.6);
 }
 
 .login h2 {
-  margin-bottom: 15px;
+  text-align: center;
+  margin-bottom: 18px;
 }
 
 .login input {
   width: 100%;
   padding: 12px;
-  border-radius: 6px;
-  border: none;
-  margin: 8px 0;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  border: 1px solid #1e293b;
+  background: #020617;
+  color: #e5e7eb;
 }
 
 .login button {
   width: 100%;
   padding: 12px;
+  border-radius: 8px;
   border: none;
-  border-radius: 6px;
-  background: linear-gradient(45deg, #00c6ff, #0072ff);
+  font-weight: 600;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
   color: #fff;
-  font-size: 16px;
-  cursor: pointer;
 }
 
-/* =========================
-   SISTEMA
-========================= */
+/* ================= SISTEMA ================= */
 .sistema {
-  width: 100%;
-  max-width: 100%;
   padding: 10px;
-  margin: 0 auto;
 }
 
-/* =========================
-   TÍTULO
-========================= */
 .titulo {
   text-align: center;
-  margin-bottom: 20px;
-  font-size: 28px;
+  font-size: 26px;
+  margin-bottom: 16px;
 }
 
-/* =========================
-   GRID (SEGURANÇA MOBILE)
-========================= */
+/* ================= ADMIN ================= */
+#areaAdmin,
+#areaLogs {
+  background: #020617;
+  border: 1px solid #1e293b;
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 16px;
+}
+
+/* ================= GRID ================= */
 .grid {
   display: flex;
-  flex-direction: column; /* MOBILE 100% SEGURO */
-  gap: 15px;
-  width: 100%;
+  flex-direction: column;
+  gap: 14px;
 }
 
-/* =========================
-   BOX / CARDS
-========================= */
+/* ================= BOX ================= */
 .box {
-  background: rgba(255,255,255,0.1);
-  padding: 15px;
-  border-radius: 14px;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-  width: 100%;
-  max-width: 100%;
-  overflow: hidden;
+  background: #020617;
+  border: 1px solid #1e293b;
+  border-radius: 16px;
+  padding: 12px;
 }
 
 .box h2 {
   text-align: center;
-  margin-bottom: 10px;
-  font-size: 18px;
+  margin-bottom: 6px;
 }
 
 .box h3 {
   text-align: center;
+  color: #f87171;
   margin-bottom: 8px;
-  color: #ffb703;
 }
 
-/* =========================
-   BOTÕES
-========================= */
+/* ================= BOTÕES ================= */
 button {
-  padding: 8px 10px;
+  background: #1e293b;
+  color: #e5e7eb;
   border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: bold;
-  background: #1e90ff;
-  color: #fff;
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin: 4px 0;
 }
 
 button:hover {
-  opacity: 0.9;
+  background: #334155;
 }
 
-td button {
-  padding: 5px 8px;
+/* ================= TABELAS ================= */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 8px;
+}
+
+thead {
+  display: none;
+}
+
+tr {
+  display: block;
+  margin-bottom: 10px;
+  background: #020617;
+  border: 1px solid #1e293b;
+  border-radius: 10px;
+  padding: 8px;
+}
+
+td {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px;
   font-size: 14px;
-  margin: 2px;
+  border-bottom: 1px solid #1e293b;
+}
+
+td:last-child {
+  border-bottom: none;
+}
+
+/* ================= AÇÕES ================= */
+td button {
+  padding: 6px 10px;
+  font-size: 14px;
 }
 
 td button:nth-child(1) { background: #16a34a; }
 td button:nth-child(2) { background: #ca8a04; }
-td button:nth-child(3) { background: #dc2626; }
+td button:nth-child(3) { background: #b91c1c; }
 
-/* =========================
-   TABELAS (NUNCA QUEBRAM LAYOUT)
-========================= */
-.table-scroll {
-  width: 100%;
-  overflow-x: auto;
-}
-
-table {
-  width: 100%;
-  min-width: 520px; /* tabelas legíveis */
-  border-collapse: collapse;
-  margin-top: 10px;
-}
-
-thead {
-  background: rgba(0,0,0,0.35);
-}
-
-th, td {
-  padding: 8px;
-  text-align: center;
-  border-bottom: 1px solid rgba(255,255,255,0.2);
-}
-
-/* =========================
-   ÁREA ADMIN / LOGS
-========================= */
-#areaAdmin,
+/* ================= LOGS ================= */
 #areaLogs {
-  width: 100%;
-  margin-bottom: 15px;
-}
-
-#areaLogs {
-  max-height: 300px;
+  max-height: 260px;
   overflow-y: auto;
 }
 
-/* =========================
-   CORES DOS LOGS
-========================= */
-.log-add       { color: #22c55e; }
-.log-rem       { color: #facc15; }
-.log-del       { color: #ef4444; }
-.log-divida    { color: #60a5fa; }
+#areaLogs tr {
+  font-size: 13px;
+}
 
-/* =========================
-   DESKTOP (2 POR LINHA)
-========================= */
+/* ================= DESKTOP ================= */
 @media (min-width: 900px) {
+
+  thead {
+    display: table-header-group;
+  }
+
+  table, thead, tbody, tr, td {
+    display: table;
+    width: 100%;
+  }
+
+  tr {
+    display: table-row;
+    background: transparent;
+    border: none;
+  }
+
+  td {
+    display: table-cell;
+    padding: 8px;
+    border-bottom: 1px solid #1e293b;
+  }
+
   .grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
-  }
-
-  .titulo {
-    font-size: 32px;
-  }
-}
-
-/* ===============================
-   MOBILE: TABELA → CARD
-=============================== */
-@media (max-width: 900px) {
-
-  /* Esconde cabeçalho */
-  table thead {
-    display: none;
-  }
-
-  table {
-    min-width: 100%;
-  }
-
-  table tbody tr {
-    display: block;
-    background: rgba(255,255,255,0.12);
-    margin-bottom: 12px;
-    border-radius: 10px;
-    padding: 10px;
-  }
-
-  table td {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 6px 4px;
-    border: none;
-    font-size: 14px;
-  }
-
-  table td::before {
-    font-weight: bold;
-    color: #ffd166;
-  }
-
-  /* Labels automáticos */
-  #estoque td:nth-child(1)::before,
-  #saida td:nth-child(1)::before,
-  #laboratorio td:nth-child(1)::before,
-  #dividas td:nth-child(1)::before {
-    content: "Data";
-  }
-
-  #estoque td:nth-child(2)::before,
-  #saida td:nth-child(2)::before,
-  #laboratorio td:nth-child(2)::before,
-  #dividas td:nth-child(2)::before {
-    content: "Nome";
-  }
-
-  #estoque td:nth-child(3)::before,
-  #saida td:nth-child(3)::before,
-  #laboratorio td:nth-child(3)::before {
-    content: "Qtd";
-  }
-
-  #dividas td:nth-child(3)::before {
-    content: "Valor";
-  }
-
-  #estoque td:nth-child(4)::before,
-  #saida td:nth-child(4)::before,
-  #laboratorio td:nth-child(4)::before,
-  #dividas td:nth-child(4)::before {
-    content: "Ações";
-  }
-
-  /* Ações alinhadas */
-  td button {
-    margin: 0 3px;
+    gap: 18px;
   }
 }
