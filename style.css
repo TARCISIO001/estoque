@@ -1,152 +1,93 @@
-/* =================================================
-   RESET GLOBAL
-================================================= */
+/* ================= RESET ================= */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: "Segoe UI", Tahoma, sans-serif;
+  font-family: Arial, sans-serif;
 }
 
-html, body {
-  width: 100%;
-  max-width: 100%;
-  overflow-x: hidden;
-}
-
-/* =================================================
-   FUNDO GERAL
-================================================= */
+/* ================= FUNDO ================= */
 body {
-  min-height: 100vh;
-  background: linear-gradient(135deg, #0f172a, #020617);
-  color: #e5e7eb;
+  background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+  color: #fff;
 }
 
-/* =================================================
-   LOGIN
-================================================= */
+/* ================= LOGIN ================= */
 .login-page {
+  min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .login {
-  background: #020617;
-  width: 320px;
-  padding: 25px;
-  border-radius: 14px;
-  text-align: center;
-  border: 1px solid #1e293b;
-  box-shadow: 0 12px 30px rgba(0,0,0,0.6);
+  width: 100%;
+  max-width: 320px;
+  background: rgba(0,0,0,0.6);
+  padding: 20px;
+  border-radius: 12px;
 }
 
 .login h2 {
-  margin-bottom: 20px;
+  text-align: center;
+  margin-bottom: 15px;
 }
 
-.login input {
-  width: 100%;
-  padding: 12px;
-  margin: 8px 0;
-  border-radius: 6px;
-  border: 1px solid #1e293b;
-  background: #020617;
-  color: #e5e7eb;
-}
-
-.login input::placeholder {
-  color: #64748b;
-}
-
+.login input,
 .login button {
   width: 100%;
-  padding: 12px;
-  margin-top: 10px;
+  margin-bottom: 10px;
+  padding: 10px;
   border-radius: 6px;
   border: none;
-  cursor: pointer;
-  font-weight: 600;
-  background: linear-gradient(45deg, #2563eb, #1d4ed8);
-  color: #fff;
 }
 
-/* =================================================
-   SISTEMA
-================================================= */
+/* ================= SISTEMA ================= */
 .sistema {
-  padding: 16px;
+  padding: 10px;
 }
 
 .titulo {
   text-align: center;
-  margin-bottom: 25px;
-  font-size: 28px;
-  color: #f8fafc;
+  margin: 15px 0;
 }
 
-/* =================================================
-   GRID
-================================================= */
-.grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
-  width: 100%;
-}
-
-/* =================================================
-   BOX (CARTÕES)
-================================================= */
+/* ================= BOX ================= */
 .box {
-  background: #020617;
-  border-radius: 14px;
-  padding: 14px;
-  border: 1px solid #1e293b;
-  box-shadow: 0 0 0 1px rgba(148,163,184,.12);
+  background: rgba(0,0,0,0.5);
+  padding: 12px;
+  border-radius: 12px;
+  margin-bottom: 15px;
 }
 
-.box h2 {
+.box h2, .box h3 {
   text-align: center;
-  font-size: 18px;
   margin-bottom: 8px;
 }
 
-.box h3 {
-  text-align: center;
-  margin-bottom: 10px;
-  color: #f87171;
-}
-
-/* =================================================
-   BOTÕES
-================================================= */
+/* ================= BOTÕES ================= */
 button {
-  padding: 6px 10px;
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 8px;
   border-radius: 6px;
   border: none;
-  cursor: pointer;
-  font-weight: 600;
-  background: #1e293b;
-  color: #e5e7eb;
+  background: #2563eb;
+  color: #fff;
+  font-size: 14px;
 }
 
 button:hover {
-  background: #334155;
+  opacity: .9;
 }
 
-td button {
-  margin: 2px;
+/* ================= GRID ================= */
+.grid {
+  display: flex;
+  flex-direction: column;
 }
 
-td button:nth-child(1) { background: #166534; }
-td button:nth-child(2) { background: #92400e; }
-td button:nth-child(3) { background: #7f1d1d; }
-
-/* =================================================
-   TABELAS
-================================================= */
+/* ================= TABELAS ================= */
 .table-scroll {
   width: 100%;
   overflow-x: auto;
@@ -154,92 +95,37 @@ td button:nth-child(3) { background: #7f1d1d; }
 
 table {
   width: 100%;
-  min-width: 600px;
+  min-width: 500px;
   border-collapse: collapse;
-  font-size: 14px;
-  margin-top: 8px;
-}
-
-thead {
-  background: #020617;
+  margin-top: 5px;
 }
 
 th, td {
-  padding: 8px;
+  border-bottom: 1px solid rgba(255,255,255,0.2);
+  padding: 6px;
   text-align: center;
-  border-bottom: 1px solid #1e293b;
-  white-space: nowrap;
+  font-size: 13px;
 }
 
-tr:hover {
-  background: rgba(255,255,255,0.03);
+thead {
+  background: rgba(0,0,0,0.6);
 }
 
-/* =================================================
-   ADMIN / LOGS
-================================================= */
-#areaAdmin, #areaLogs {
-  margin-top: 20px;
-}
-
+/* ================= LOGS ================= */
 #areaLogs {
   max-height: 300px;
   overflow-y: auto;
-  border: 1px solid #1e293b;
-  border-radius: 8px;
-  padding: 8px;
 }
 
-#areaLogs table {
-  min-width: 800px;
-}
-
-/* =================================================
-   CORES DOS LOGS
-================================================= */
-.log-entrada,
-.log-aumentou {
-  background: rgba(34,197,94,0.15);
-}
-
-.log-saida,
-.log-diminuiu {
-  background: rgba(251,146,60,0.15);
-}
-
-.log-exclusao {
-  background: rgba(239,68,68,0.15);
-}
-
-.log-divida {
-  background: rgba(59,130,246,0.15);
-}
-
-/* =================================================
-   RESPONSIVO MOBILE
-================================================= */
-@media (max-width: 768px) {
-
-  .titulo {
-    font-size: 22px;
-  }
-
+/* ================= DESKTOP ================= */
+@media (min-width: 768px) {
   .grid {
-    display: flex;
-    flex-direction: column;
-  }
-
-  .box {
-    padding: 12px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
   }
 
   button {
-    font-size: 15px;
-    padding: 8px 10px;
+    width: auto;
   }
-
-  table {
-    min-width: 650px;
-  }
-
 }
