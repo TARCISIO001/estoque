@@ -1,93 +1,154 @@
-/* ================= RESET ================= */
+/* =========================
+   RESET GLOBAL
+========================= */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: Arial, sans-serif;
+  font-family: "Segoe UI", Tahoma, sans-serif;
 }
 
-/* ================= FUNDO ================= */
+html, body {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden; /* IMPEDE QUALQUER DESLOCAMENTO */
+}
+
+/* =========================
+   FUNDO GERAL
+========================= */
 body {
+  min-height: 100vh;
   background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
   color: #fff;
 }
 
-/* ================= LOGIN ================= */
+/* =========================
+   LOGIN
+========================= */
 .login-page {
-  min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .login {
+  background: rgba(255,255,255,0.12);
+  padding: 25px;
   width: 100%;
   max-width: 320px;
-  background: rgba(0,0,0,0.6);
-  padding: 20px;
-  border-radius: 12px;
+  border-radius: 14px;
+  text-align: center;
+  box-shadow: 0 12px 25px rgba(0,0,0,0.4);
 }
 
 .login h2 {
-  text-align: center;
   margin-bottom: 15px;
 }
 
-.login input,
+.login input {
+  width: 100%;
+  padding: 12px;
+  border-radius: 6px;
+  border: none;
+  margin: 8px 0;
+}
+
 .login button {
   width: 100%;
-  margin-bottom: 10px;
-  padding: 10px;
-  border-radius: 6px;
+  padding: 12px;
   border: none;
+  border-radius: 6px;
+  background: linear-gradient(45deg, #00c6ff, #0072ff);
+  color: #fff;
+  font-size: 16px;
+  cursor: pointer;
 }
 
-/* ================= SISTEMA ================= */
+/* =========================
+   SISTEMA
+========================= */
 .sistema {
+  width: 100%;
+  max-width: 100%;
   padding: 10px;
+  margin: 0 auto;
 }
 
+/* =========================
+   TÍTULO
+========================= */
 .titulo {
   text-align: center;
-  margin: 15px 0;
+  margin-bottom: 20px;
+  font-size: 28px;
 }
 
-/* ================= BOX ================= */
+/* =========================
+   GRID (SEGURANÇA MOBILE)
+========================= */
+.grid {
+  display: flex;
+  flex-direction: column; /* MOBILE 100% SEGURO */
+  gap: 15px;
+  width: 100%;
+}
+
+/* =========================
+   BOX / CARDS
+========================= */
 .box {
-  background: rgba(0,0,0,0.5);
-  padding: 12px;
-  border-radius: 12px;
-  margin-bottom: 15px;
+  background: rgba(255,255,255,0.1);
+  padding: 15px;
+  border-radius: 14px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
 }
 
-.box h2, .box h3 {
+.box h2 {
+  text-align: center;
+  margin-bottom: 10px;
+  font-size: 18px;
+}
+
+.box h3 {
   text-align: center;
   margin-bottom: 8px;
+  color: #ffb703;
 }
 
-/* ================= BOTÕES ================= */
+/* =========================
+   BOTÕES
+========================= */
 button {
-  width: 100%;
-  padding: 10px;
-  margin-bottom: 8px;
-  border-radius: 6px;
+  padding: 8px 10px;
   border: none;
-  background: #2563eb;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  background: #1e90ff;
   color: #fff;
-  font-size: 14px;
 }
 
 button:hover {
-  opacity: .9;
+  opacity: 0.9;
 }
 
-/* ================= GRID ================= */
-.grid {
-  display: flex;
-  flex-direction: column;
+td button {
+  padding: 5px 8px;
+  font-size: 14px;
+  margin: 2px;
 }
 
-/* ================= TABELAS ================= */
+td button:nth-child(1) { background: #16a34a; }
+td button:nth-child(2) { background: #ca8a04; }
+td button:nth-child(3) { background: #dc2626; }
+
+/* =========================
+   TABELAS (NUNCA QUEBRAM LAYOUT)
+========================= */
 .table-scroll {
   width: 100%;
   overflow-x: auto;
@@ -95,37 +156,54 @@ button:hover {
 
 table {
   width: 100%;
-  min-width: 500px;
+  min-width: 520px; /* tabelas legíveis */
   border-collapse: collapse;
-  margin-top: 5px;
-}
-
-th, td {
-  border-bottom: 1px solid rgba(255,255,255,0.2);
-  padding: 6px;
-  text-align: center;
-  font-size: 13px;
+  margin-top: 10px;
 }
 
 thead {
-  background: rgba(0,0,0,0.6);
+  background: rgba(0,0,0,0.35);
 }
 
-/* ================= LOGS ================= */
+th, td {
+  padding: 8px;
+  text-align: center;
+  border-bottom: 1px solid rgba(255,255,255,0.2);
+}
+
+/* =========================
+   ÁREA ADMIN / LOGS
+========================= */
+#areaAdmin,
+#areaLogs {
+  width: 100%;
+  margin-bottom: 15px;
+}
+
 #areaLogs {
   max-height: 300px;
   overflow-y: auto;
 }
 
-/* ================= DESKTOP ================= */
-@media (min-width: 768px) {
+/* =========================
+   CORES DOS LOGS
+========================= */
+.log-add       { color: #22c55e; }
+.log-rem       { color: #facc15; }
+.log-del       { color: #ef4444; }
+.log-divida    { color: #60a5fa; }
+
+/* =========================
+   DESKTOP (2 POR LINHA)
+========================= */
+@media (min-width: 900px) {
   .grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 15px;
+    gap: 20px;
   }
 
-  button {
-    width: auto;
+  .titulo {
+    font-size: 32px;
   }
 }
