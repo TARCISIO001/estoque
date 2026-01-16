@@ -1,29 +1,187 @@
+/* ================= RESET ================= */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Segoe UI", Roboto, sans-serif;
+}
+
+/* ================= FUNDO ================= */
+body {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #020617, #020617);
+  color: #e5e7eb;
+}
+
+/* ================= LOGIN ================= */
+.login-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+}
+
+.login {
+  width: 100%;
+  max-width: 360px;
+  background: #020617;
+  border: 1px solid #1e293b;
+  border-radius: 14px;
+  padding: 24px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+}
+
+.login h2 {
+  text-align: center;
+  margin-bottom: 18px;
+}
+
+.login input {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  border: 1px solid #1e293b;
+  background: #020617;
+  color: #e5e7eb;
+}
+
+.login button {
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  border: none;
+  font-weight: 600;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: #fff;
+}
+
+/* ================= SISTEMA ================= */
+.sistema {
+  padding: 10px;
+}
+
+.titulo {
+  text-align: center;
+  font-size: 26px;
+  margin-bottom: 16px;
+}
+
+/* ================= ADMIN ================= */
+#areaAdmin,
+#areaLogs {
+  background: #020617;
+  border: 1px solid #1e293b;
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 16px;
+}
+
+/* ================= GRID ================= */
+.grid {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* ================= BOX ================= */
+.box {
+  background: #020617;
+  border: 1px solid #1e293b;
+  border-radius: 16px;
+  padding: 12px;
+}
+
+.box h2 {
+  text-align: center;
+  margin-bottom: 6px;
+}
+
+.box h3 {
+  text-align: center;
+  color: #f87171;
+  margin-bottom: 8px;
+}
+
+/* ================= BOTÕES ================= */
+button {
+  background: #1e293b;
+  color: #e5e7eb;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin: 4px 0;
+}
+
+button:hover {
+  background: #334155;
+}
+
+/* ================= TABELAS ================= */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 8px;
+}
+
+thead {
+  display: none;
+}
+
+tr {
+  display: block;
+  margin-bottom: 10px;
+  background: #020617;
+  border: 1px solid #1e293b;
+  border-radius: 10px;
+  padding: 8px;
+}
+
+td {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px;
+  font-size: 14px;
+  border-bottom: 1px solid #1e293b;
+}
+
+td:last-child {
+  border-bottom: none;
+}
+
+/* ================= AÇÕES ================= */
+td button {
+  padding: 6px 10px;
+  font-size: 14px;
+}
+
+td button:nth-child(1) { background: #16a34a; }
+td button:nth-child(2) { background: #ca8a04; }
+td button:nth-child(3) { background: #b91c1c; }
+
+/* ================= LOGS ================= */
+#areaLogs {
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+#areaLogs tr {
+  font-size: 13px;
+}
+
 /* ================= DESKTOP ================= */
+/* ================= DESKTOP (CORREÇÃO SEM MUDAR VISUAL) ================= */
 @media (min-width: 900px) {
 
-  body {
-    padding: 20px;
-  }
-
-  .sistema {
-    max-width: 1400px;
-    margin: 0 auto;
-  }
-
-  /* GRID ORGANIZADO */
+  /* GRID: só organiza em colunas */
   .grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 20px;
-    align-items: stretch;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
   }
 
-  /* BOX PADRÃO */
-  .box {
-    height: 100%;
-  }
+  /* ===== TABELAS VOLTAM AO NORMAL ===== */
 
-  /* ================= TABELAS DESKTOP ================= */
   table {
     width: 100%;
     border-collapse: collapse;
@@ -39,41 +197,77 @@
 
   tr {
     display: table-row;
-    background: transparent;
+    background: #020617; /* mantém o FUNDO ESCURO */
     border: none;
   }
 
-  td, th {
-    display: table-cell;
-    padding: 10px;
-    border-bottom: 1px solid #1e293b;
-    text-align: left;
-    font-size: 14px;
-  }
-
   th {
-    font-weight: 600;
-    color: #cbd5f5;
+    padding: 8px;
+    text-align: left;
+    color: #e5e7eb;
+    background: #020617;
+    border-bottom: 1px solid #1e293b;
   }
 
-  /* BOTÕES EM LINHA */
+  td {
+    display: table-cell;
+    padding: 8px;
+    border-bottom: 1px solid #1e293b;
+    font-size: 14px;
+    color: #e5e7eb;
+  }
+
+  /* NÃO QUEBRAR BOTÕES */
   td:last-child {
     white-space: nowrap;
   }
 
-  td button {
-    margin: 0 3px;
-  }
+}
 
-  /* ADMIN E LOGS EM LINHA */
-  #areaAdmin,
-  #areaLogs {
-    max-width: 100%;
-  }
 
-  /* LOGS COM SCROLL */
-  #areaLogs {
-    max-height: 300px;
-    overflow-y: auto;
-  }
+/* ================= CORES DOS LOGS ================= */
+
+/* Base dos logs */
+#areaLogs tr {
+  border-left: 6px solid transparent;
+  border-radius: 8px;
+}
+
+/* ADICIONOU / ENTROU / AUMENTOU */
+.log-add,
+.log-entrada,
+.log-aumentou {
+  background: rgba(34,197,94,0.15);
+  border-left-color: #22c55e;
+  color: #bbf7d0;
+}
+
+/* DIMINUIU / SAÍDA */
+.log-rem,
+.log-diminuiu,
+.log-saida {
+  background: rgba(234,179,8,0.15);
+  border-left-color: #eab308;
+  color: #fde68a;
+}
+
+/* EXCLUSÃO */
+.log-del,
+.log-exclusao {
+  background: rgba(239,68,68,0.15);
+  border-left-color: #ef4444;
+  color: #fecaca;
+}
+
+/* DÍVIDAS */
+.log-divida {
+  background: rgba(59,130,246,0.15);
+  border-left-color: #3b82f6;
+  color: #bfdbfe;
+}
+
+/* USUÁRIO / ADMIN */
+.log-user {
+  background: rgba(148,163,184,0.15);
+  border-left-color: #94a3b8;
 }
