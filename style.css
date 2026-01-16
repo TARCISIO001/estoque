@@ -300,5 +300,47 @@ td button {
     justify-content: space-between;
   }
 }
+/* ================= REFINO DE TÍTULOS E CABEÇALHOS ================= */
+
+/* Título principal */
+.titulo {
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+/* Título das caixas */
+.box h2 {
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: #e5e7eb;
+  margin-bottom: 10px;
+}
+
+/* Subtítulos (saldo / seções) */
+.box h3 {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+}
+
+/* Cabeçalho de tabelas */
+th {
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #cbd5f5;
+}
+
+/* Mobile: equilíbrio visual */
+@media (max-width: 899px) {
+  .box h2 {
+    text-align: center;
+  }
+}
+
 
 
