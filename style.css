@@ -157,7 +157,8 @@ td button {
 
 td button:nth-child(1) { background: #16a34a; }
 td button:nth-child(2) { background: #ca8a04; }
-td button:nth-child(3) { background: #b91c1c; }
+td button:nth-child(4) { background: #b91c1c; }
+td button:nth-child(3) { background: #0905d1; }
 
 /* ================= LOGS ================= */
 #areaLogs {
@@ -272,6 +273,7 @@ td button:nth-child(3) { background: #b91c1c; }
   border-left-color: #94a3b8;
 }
 
+
 /* ================= MELHORIA ALINHAMENTO BOTÕES ================= */
 
 /* Área de ações */
@@ -300,6 +302,7 @@ td button {
     justify-content: space-between;
   }
 }
+
 /* ================= REFINO DE TÍTULOS E CABEÇALHOS ================= */
 
 /* Título principal */
@@ -341,6 +344,15 @@ th {
     text-align: center;
   }
 }
+/* ================= SCROLL INTERNO NAS TABELAS ================= */
+
+/* Área que envolve a tabela */
+.table-scroll {
+  max-height: 260px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 4px; /* evita cortar scrollbar */
+}
 
 /* Desktop: um pouco mais alto */
 @media (min-width: 900px) {
@@ -348,6 +360,3 @@ th {
     max-height: 320px;
   }
 }
-
-
-
