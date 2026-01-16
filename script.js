@@ -130,11 +130,9 @@ let acao = v > 0 ? "Aumentou" : "Diminuiu";
 r.update({ quantidade: n }).then(() => {
   registrarLog(
     "Estoque",
-    `${acao} estoque | ID: ${id} | Nova qtd: ${n}`
+    `${usuarioLogado.usuario} ${acao.toLowerCase()} estoque | Material: ${d.data().nome} | Nova qtd: ${n}`
   );
 });
-
-
   });
 }
 
@@ -217,10 +215,16 @@ function alterarSaida(id, v){
         db.collection("estoque").doc(e.id)
           .update({ quantidade: estoqueNovo });
 
-        r.update({ quantidade: novaQtd });
+        r.update({ quantidade: novaQtd }).then(()=>{
+          registrarLog(
+            "Saída",
+            `${usuarioLogado.usuario} alterou saída | Material: ${d.data().nome} | Nova qtd: ${novaQtd}`
+          );
+        });
       });
   });
 }
+
 
 // ======================
 // LABORATÓRIO (CORRIGIDO)
@@ -272,9 +276,16 @@ function alterarLaboratorio(id, v){
   r.get().then(d=>{
     let novaQtd = d.data().quantidade + v;
     if(novaQtd < 0) return;
-    r.update({ quantidade: novaQtd });
+
+    r.update({ quantidade: novaQtd }).then(()=>{
+      registrarLog(
+        "Laboratório",
+        `${usuarioLogado.usuario} alterou laboratório | Material: ${d.data().nome} | Nova qtd: ${novaQtd}`
+      );
+    });
   });
 }
+
 
 // ======================
 // DÍVIDAS
@@ -357,19 +368,18 @@ function editarDivida(id, v, inc){
 
   const r = db.collection("dividas").doc(id);
 
-  r.get().then(d=>{
-    let n = inc ? d.data().valor + v : Number(v);
-    if(n < 0) n = 0;
-   r.update({ valor: n }).then(()=>{
-  registrarLog(
-    "Alteração dívida",
-    `ID: ${id}, Novo valor: ${n}`
-  );
-});
+r.get().then(d=>{
+  let n = inc ? d.data().valor + v : Number(v);
+  if(n < 0) n = 0;
 
+  r.update({ valor: n }).then(()=>{
+    registrarLog(
+      "Alteração dívida",
+      `${usuarioLogado.usuario} alterou dívida | Novo valor: ${n}`
+    );
   });
+});
 }
-
 // ======================
 // EXCLUIR
 // ======================
@@ -383,15 +393,13 @@ function excluir(c, id){
     db.collection(c).doc(id).delete().then(()=>{
       registrarLog(
         "Exclusão",
-        `Excluiu registro da coleção ${c} (ID: ${id})`
+        `${usuarioLogado.usuario} excluiu registro da coleção ${c}`
       );
     });
   }
 }
 
 
-
-// FORMATO DATA
 // ======================
 // FORMATO E VALIDAÇÃO DATA
 // ======================
@@ -536,11 +544,6 @@ function carregarLogs(){
 
     });
 }
-
-
-
-
-
 function registrarLog(acao, detalhes){
   db.collection("logs").add({
     usuario: usuarioLogado?.usuario || "desconhecido",
