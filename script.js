@@ -108,11 +108,13 @@ function carregarEstoque(){
         <td>${i.data}</td>
         <td>${i.nome}</td>
         <td>${i.quantidade}</td>
-        <td>
-          <button onclick="alterarEstoque('${d.id}',1)">➕</button>
-          <button onclick="alterarEstoque('${d.id}',-1)">➖</button>
-          <button onclick="excluir('estoque','${d.id}')">🗑️</button>
-        </td>
+       <td>
+  <button onclick="alterarEstoque('${d.id}',1)">➕</button>
+  <button onclick="alterarEstoque('${d.id}',-1)">➖</button>
+  <button onclick="editarNome('estoque','${d.id}','${i.nome}')">✏️</button>
+  <button onclick="excluir('estoque','${d.id}')">🗑️</button>
+</td>
+
       </tr>`;
     });
   });
@@ -183,10 +185,12 @@ function carregarSaida(){
         <td>${i.nome}</td>
         <td>${i.quantidade}</td>
         <td>
-          <button onclick="alterarSaida('${d.id}',1)">➕</button>
-          <button onclick="alterarSaida('${d.id}',-1)">➖</button>
-          <button onclick="excluir('saida','${d.id}')">🗑️</button>
-        </td>
+  <button onclick="alterarSaida('${d.id}',1)">➕</button>
+  <button onclick="alterarSaida('${d.id}',-1)">➖</button>
+  <button onclick="editarNome('saida','${d.id}','${i.nome}')">✏️</button>
+  <button onclick="excluir('saida','${d.id}')">🗑️</button>
+</td>
+
       </tr>`;
     });
   });
@@ -251,10 +255,13 @@ function carregarLaboratorio(){
         <td>${i.nome}</td>
         <td>${i.quantidade}</td>
         <td>
-          <button onclick="alterarLaboratorio('${d.id}',1)">➕</button>
-          <button onclick="alterarLaboratorio('${d.id}',-1)">➖</button>
-          <button onclick="excluir('laboratorio','${d.id}')">🗑️</button>
-        </td>
+  <button onclick="alterarLaboratorio('${d.id}',1)">➕</button>
+  <button onclick="alterarLaboratorio('${d.id}',-1)">➖</button>
+  <button onclick="editarNome('laboratorio','${d.id}','${i.nome}')">✏️</button>
+  <button onclick="excluir('laboratorio','${d.id}')">🗑️</button>
+ 
+</td>
+
       </tr>`;
     });
   });
@@ -327,7 +334,9 @@ function carregarDividas(){
               ? `
                 <button onclick="editarDivida('${d.id}',1,true)">➕</button>
                 <button onclick="editarDivida('${d.id}',-1,true)">➖</button>
+                <button onclick="editarNome('dividas','${d.id}','${i.nome}')">✏️</button>
                 <button onclick="excluir('dividas','${d.id}')">🗑️</button>
+
               `
               : '👁️'
           }
@@ -415,6 +424,23 @@ function validarNome(nome){
   }
   return true;
 }
+  //VALIDAR NOME
+function editarNome(colecao, id, nomeAtual){
+  const novoNome = prompt("Editar nome:", nomeAtual);
+  if(!novoNome) return;
+
+  if(!validarNome(novoNome)) return;
+
+  db.collection(colecao)
+    .doc(id)
+    .update({ nome: novoNome })
+    .then(()=>{
+      registrarLog(
+        "Edição de nome",
+        `Coleção: ${colecao} | De "${nomeAtual}" para "${novoNome}"`
+      );
+    });
+}
 
 // função criar area  master
 
@@ -489,26 +515,25 @@ function carregarLogs(){
     .onSnapshot(snapshot=>{
       lista.innerHTML = "";
 
-      snapshot.forEach(doc=>{
-        const l = doc.data();
-        let classe = "";
+      snapshot.forEach(doc => {
+  const l = doc.data();
+  let classe = "";
 
-        if(l.acao.includes("Entrada") || l.acao.includes("Aumentou"))
-          classe = "log-add";
-        else if(l.acao.includes("Saída") || l.acao.includes("Diminuiu"))
-          classe = "log-rem";
-        else if(l.acao.includes("Exclusão"))
-          classe = "log-del";
+  if(l.acao.includes("Entrada") || l.acao.includes("Aumentou")) classe = "log-add";
+  else if(l.acao.includes("Saída") || l.acao.includes("Diminuiu")) classe = "log-rem";
+  else if(l.acao.includes("Exclusão")) classe = "log-del";
+  else if(l.acao.includes("dívida")) classe = "log-divida";
 
-        lista.innerHTML += `
-          <tr class="${classe}">
-            <td>${l.usuario}</td>
-            <td>${l.acao}</td>
-            <td>${l.detalhes}</td>
-            <td>${l.data}</td>
-          </tr>
-        `;
-      });
+  lista.innerHTML += `
+    <tr class="${classe}">
+      <td>${l.usuario}</td>
+      <td>${l.acao}</td>
+      <td>${l.detalhes}</td>
+      <td>${l.data}</td>
+    </tr>
+  `;
+});
+
     });
 }
 
