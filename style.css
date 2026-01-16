@@ -342,5 +342,12 @@ th {
   }
 }
 
+/* Desktop: um pouco mais alto */
+@media (min-width: 900px) {
+  .table-scroll {
+    max-height: 320px;
+  }
+}
+
 
 
