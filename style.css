@@ -271,3 +271,34 @@ td button:nth-child(3) { background: #b91c1c; }
   background: rgba(148,163,184,0.15);
   border-left-color: #94a3b8;
 }
+
+/* ================= MELHORIA ALINHAMENTO BOTÕES ================= */
+
+/* Área de ações */
+td:last-child {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+/* Botões consistentes */
+td button {
+  min-width: 34px;
+  height: 32px;
+  padding: 0 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  border-radius: 6px;
+}
+
+/* Mobile: mantém quebra bonita */
+@media (max-width: 899px) {
+  td:last-child {
+    justify-content: space-between;
+  }
+}
+
+
