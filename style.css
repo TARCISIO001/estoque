@@ -427,3 +427,35 @@ tbody tr:hover {
   animation: highlightQtd 2.5s ease-out;
   border-left: 6px solid #eab308 !important;
 }
+
+#btnSair {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;                 /* espaço entre ícone e texto */
+  background: linear-gradient(135deg, #ff5f6d, #ffc371); /* gradiente moderno */
+  color: #fff;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+#btnSair:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+  background: linear-gradient(135deg, #ff6f71, #ffb871);
+}
+
+#btnSair:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+#btnSair .icon {
+  font-size: 18px;
+}
+
