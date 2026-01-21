@@ -408,3 +408,22 @@ tbody tr:hover {
   transition: 0.2s ease;
   box-shadow: 0 8px 22px rgba(0,0,0,0.6);
 }
+
+/* ================= DESTAQUE QUANTIDADE ALTERADA ================= */
+
+@keyframes highlightQtd {
+  0% {
+    background-color: rgba(234,179,8,0.35); /* amarelo */
+    box-shadow: 0 0 0 0 rgba(234,179,8,0.8);
+  }
+  100% {
+    background-color: transparent;
+    box-shadow: none;
+  }
+}
+
+/* quando quantidade muda */
+.tr-qtd {
+  animation: highlightQtd 2.5s ease-out;
+  border-left: 6px solid #eab308 !important;
+}
