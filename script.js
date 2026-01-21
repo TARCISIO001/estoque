@@ -17,6 +17,22 @@ const db = firebase.firestore();
 
 let usuarioLogado = null;
 
+// TEMPO DE INATIVIDADE PARA LOGOUT (10 minutos)
+const TEMPO_LIMITE = 10 * 60 * 1000; // 10 minutos em milissegundos
+let timerLogout; // guarda o timer
+
+function resetarTimer() {
+  // se já existir um timer, cancela
+  if (timerLogout) clearTimeout(timerLogout);
+
+  // cria novo timer
+  timerLogout = setTimeout(() => {
+    alert("Você ficou inativo. Voltando para login.");
+    sair(); // chama a função de logout que você já tem
+  }, TEMPO_LIMITE);
+}
+
+
 function login() {
   const usuario = document.getElementById("usuario").value.trim();
   const senha = document.getElementById("senha").value.trim();
@@ -42,8 +58,12 @@ function login() {
         id: snapshot.docs[0].id,
         ...snapshot.docs[0].data()
       };
-
-      // troca telas
+      localStorage.setItem(
+        "usuarioLogado",
+         JSON.stringify(usuarioLogado)
+);
+      
+// troca telas
       document.getElementById("login").style.display = "none";
       document.getElementById("sistema").style.display = "block";
 
@@ -865,3 +885,48 @@ function migrarDatasParaOrdem() {
 }
 
 
+document.addEventListener("DOMContentLoaded", () => {
+
+  // 🔑 iniciar escuta de atividades do usuário para logout automático
+  document.addEventListener("mousemove", resetarTimer);
+  document.addEventListener("keydown", resetarTimer);
+  document.addEventListener("click", resetarTimer);
+  document.addEventListener("scroll", resetarTimer);
+
+  const salvo = localStorage.getItem("usuarioLogado");
+
+  if (salvo) {
+    usuarioLogado = JSON.parse(salvo);
+
+    document.getElementById("login").style.display = "none";
+    document.getElementById("sistema").style.display = "block";
+
+    if (usuarioLogado.tipo === "master") {
+      document.getElementById("areaAdmin").style.display = "block";
+      document.getElementById("areaLogs").style.display = "block";
+      document.getElementById("areaMasterConfig").style.display = "block";
+
+      carregarUsuarios();
+      carregarLogs();
+    }
+
+    carregarEstoque();
+    carregarSaida();
+    carregarLaboratorio();
+    carregarDividas();
+
+    // 🔑 inicia o timer automático de logout
+    resetarTimer();
+  }
+});
+
+
+ 
+
+// ======================
+// SAIR / LOGOUT
+// ======================
+function sair() {
+  localStorage.removeItem("usuarioLogado");
+  location.reload();
+}
