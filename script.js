@@ -99,30 +99,51 @@ db.collection("estoque")
 }
 
 function carregarEstoque(){
-  estoque.innerHTML = "";
   db.collection("estoque")
-  .orderBy("dataOrdem", "desc")
-  .onSnapshot(s => {
+    .orderBy("dataOrdem", "desc")
+    .onSnapshot(snapshot => {
 
-    estoque.innerHTML = "";
-    s.forEach(d => {
-      const i = d.data();
-      estoque.innerHTML += `
-      <tr>
-        <td>${i.data}</td>
-        <td>${i.nome}</td>
-        <td>${i.quantidade}</td>
-       <td>
-  <button onclick="alterarEstoque('${d.id}',1)">➕</button>
-  <button onclick="alterarEstoque('${d.id}',-1)">➖</button>
-  <button onclick="editarNome('estoque','${d.id}','${i.nome}')">✏️</button>
-  <button onclick="excluir('estoque','${d.id}')">🗑️</button>
-</td>
+      snapshot.docChanges().forEach(change => {
+        const d = change.doc;
+        const i = d.data();
 
-      </tr>`;
+        let tr = document.getElementById("estoque-" + d.id);
+
+        // REMOVER
+        if (change.type === "removed") {
+          if (tr) tr.remove();
+          return;
+        }
+
+        // CRIAR
+        if (!tr) {
+          tr = document.createElement("tr");
+          tr.id = "estoque-" + d.id;
+          estoque.prepend(tr); // novos em cima
+        }
+
+        // DESTAQUE AO ALTERAR
+        if (change.type === "modified") {
+          tr.classList.remove("tr-qtd");
+          void tr.offsetWidth;
+          tr.classList.add("tr-qtd");
+        }
+
+        tr.innerHTML = `
+          <td>${i.data}</td>
+          <td>${i.nome}</td>
+          <td>${i.quantidade}</td>
+          <td>
+            <button onclick="alterarEstoque('${d.id}',1)">➕</button>
+            <button onclick="alterarEstoque('${d.id}',-1)">➖</button>
+            <button onclick="editarNome('estoque','${d.id}','${i.nome}')">✏️</button>
+            <button onclick="excluir('estoque','${d.id}')">🗑️</button>
+          </td>
+        `;
+      });
     });
-  });
 }
+
 
 function alterarEstoque(id, v){
   const r = db.collection("estoque").doc(id);
@@ -185,30 +206,49 @@ if(!validarNome(nome)) return;
 }
 
 function carregarSaida(){
-  saida.innerHTML = "";
   db.collection("saida")
-  .orderBy("dataOrdem", "desc")
-  .onSnapshot(s=>{
+    .orderBy("dataOrdem", "desc")
+    .onSnapshot(snapshot => {
 
-    saida.innerHTML = "";
-    s.forEach(d=>{
-      const i=d.data();
-      saida.innerHTML += `
-      <tr>
-        <td>${i.data}</td>
-        <td>${i.nome}</td>
-        <td>${i.quantidade}</td>
-        <td>
-  <button onclick="alterarSaida('${d.id}',1)">➕</button>
-  <button onclick="alterarSaida('${d.id}',-1)">➖</button>
-  <button onclick="editarNome('saida','${d.id}','${i.nome}')">✏️</button>
-  <button onclick="excluir('saida','${d.id}')">🗑️</button>
-</td>
+      snapshot.docChanges().forEach(change => {
+        const d = change.doc;
+        const i = d.data();
 
-      </tr>`;
+        let tr = document.getElementById("saida-" + d.id);
+
+        if (change.type === "removed") {
+          if (tr) tr.remove();
+          return;
+        }
+
+        if (!tr) {
+          tr = document.createElement("tr");
+          tr.id = "saida-" + d.id;
+          saida.prepend(tr);
+        }
+
+        if (change.type === "modified") {
+          tr.classList.remove("tr-qtd");
+          void tr.offsetWidth;
+          tr.classList.add("tr-qtd");
+        }
+
+        tr.innerHTML = `
+          <td>${i.data}</td>
+          <td>${i.nome}</td>
+          <td>${i.quantidade}</td>
+          <td>
+            <button onclick="alterarSaida('${d.id}',1)">➕</button>
+            <button onclick="alterarSaida('${d.id}',-1)">➖</button>
+            <button onclick="editarNome('saida','${d.id}','${i.nome}')">✏️</button>
+            <button onclick="excluir('saida','${d.id}')">🗑️</button>
+          </td>
+        `;
+      });
     });
-  });
 }
+
+
 
 function alterarSaida(id, v){
   const r = db.collection("saida").doc(id);
@@ -268,33 +308,48 @@ if(!validarNome(n)) return;
 
 }
 function carregarLaboratorio(){
-  laboratorio.innerHTML="";
   db.collection("laboratorio")
-  .orderBy("dataOrdem", "desc")
-  .onSnapshot(s=>{
+    .orderBy("dataOrdem", "desc")
+    .onSnapshot(snapshot => {
 
+      snapshot.docChanges().forEach(change => {
+        const d = change.doc;
+        const i = d.data();
 
-    laboratorio.innerHTML="";
-    s.forEach(d=>{
-      const i=d.data();
-      laboratorio.innerHTML+=`
-      <tr>
-        <td>${i.data}</td>
-        <td>${i.nome}</td>
-        <td>${i.quantidade}</td>
-        <td>
-  <button onclick="alterarLaboratorio('${d.id}',1)">➕</button>
-  <button onclick="alterarLaboratorio('${d.id}',-1)">➖</button>
-  <button onclick="editarNome('laboratorio','${d.id}','${i.nome}')">✏️</button>
-  
-   <button onclick="excluir('laboratorio','${d.id}')">🗑️</button>
- 
-</td>
+        let tr = document.getElementById("lab-" + d.id);
 
-      </tr>`;
+        if (change.type === "removed") {
+          if (tr) tr.remove();
+          return;
+        }
+
+        if (!tr) {
+          tr = document.createElement("tr");
+          tr.id = "lab-" + d.id;
+          laboratorio.prepend(tr);
+        }
+
+        if (change.type === "modified") {
+          tr.classList.remove("tr-qtd");
+          void tr.offsetWidth;
+          tr.classList.add("tr-qtd");
+        }
+
+        tr.innerHTML = `
+          <td>${i.data}</td>
+          <td>${i.nome}</td>
+          <td>${i.quantidade}</td>
+          <td>
+            <button onclick="alterarLaboratorio('${d.id}',1)">➕</button>
+            <button onclick="alterarLaboratorio('${d.id}',-1)">➖</button>
+            <button onclick="editarNome('laboratorio','${d.id}','${i.nome}')">✏️</button>
+            <button onclick="excluir('laboratorio','${d.id}')">🗑️</button>
+          </td>
+        `;
+      });
     });
-  });
 }
+
 function alterarLaboratorio(id, v){
   const r = db.collection("laboratorio").doc(id);
 
@@ -345,64 +400,89 @@ function addDivida(){
   });
 }
 
-
 function carregarDividas(){
-  dividas.innerHTML = "";
   let total = 0;
+  const linhas = {}; // cache local das linhas
 
   db.collection("dividas")
     .orderBy("dataOrdem", "desc")
     .onSnapshot(snapshot => {
 
-    dividas.innerHTML = "";
-    total = 0;
+      // percorre mudanças
+      snapshot.docChanges().forEach(change => {
+        const d = change.doc;
+        const i = d.data();
 
-    snapshot.forEach(d => {
-      const i = d.data();
-      const subtotal = (i.quantidade || 1) * i.valor;
-      total += subtotal;
+        // 🔴 REMOVIDO
+        if (change.type === "removed") {
+          const tr = document.getElementById("divida-" + d.id);
+          if (tr) tr.remove();
+          return;
+        }
 
-      dividas.innerHTML += `
-      <tr>
-        <td>${i.data}</td>
-        <td>${i.nome}</td>
+        // 🔵 CRIAR ou ATUALIZAR linha
+        let tr = document.getElementById("divida-" + d.id);
 
-        <td ${
-          usuarioLogado?.tipo === "master"
-            ? `contenteditable onblur="editarQtdDivida('${d.id}', this.innerText)"`
-            : ""
-        }>
-          ${i.quantidade || 1}
-        </td>
+        if (!tr) {
+          tr = document.createElement("tr");
+          tr.id = "divida-" + d.id;
+          dividas.prepend(tr); // 👉 novas sempre no topo
+        }
 
-        <td ${
-          usuarioLogado?.tipo === "master"
-            ? `contenteditable onblur="editarDivida('${d.id}', this.innerText)"`
-            : ""
-        }>
-          ${i.valor.toFixed(2)}
-        </td>
+        // 🔥 destaque somente para NEW ou MODIFIED
+        if (change.type === "added" || change.type === "modified") {
+          tr.classList.remove("tr-qtd"); // força reset
+          void tr.offsetWidth; // reflow
+          tr.classList.add("tr-qtd");
+        }
 
-        <td>
-          ${
+        const subtotal = (i.quantidade || 1) * i.valor;
+
+        tr.innerHTML = `
+          <td>${i.data}</td>
+          <td>${i.nome}</td>
+
+          <td ${
             usuarioLogado?.tipo === "master"
-              ? `
-              <button onclick="editarQtdDivida('${d.id}',1,true)">➕</button>
-              <button onclick="editarQtdDivida('${d.id}',-1,true)">➖</button>
-              <button onclick="editarNome('dividas','${d.id}','${i.nome}')">✏️</button>
-              <button onclick="editarValorDivida('${d.id}', ${i.valor})">💲</button>
-              <button onclick="excluir('dividas','${d.id}')">🗑️</button>
+              ? `contenteditable onblur="editarQtdDivida('${d.id}', this.innerText)"`
+              : ""
+          }>
+            ${i.quantidade || 1}
+          </td>
 
-              `
-              : '👁️'
-          }
-        </td>
-      </tr>`;
+          <td>${i.valor.toFixed(2)}</td>
+
+          <td>
+            ${
+              usuarioLogado?.tipo === "master"
+                ? `
+                  <button onclick="editarQtdDivida('${d.id}',1,true)">➕</button>
+                  <button onclick="editarQtdDivida('${d.id}',-1,true)">➖</button>
+                  <button onclick="editarNome('dividas','${d.id}','${i.nome}')">✏️</button>
+                  <button onclick="editarValorDivida('${d.id}', ${i.valor})">💲</button>
+                  <button onclick="excluir('dividas','${d.id}')">🗑️</button>
+                `
+                : '👁️'
+            }
+          </td>
+        `;
+
+      });
+
+      // 🔢 recalcula total SEM apagar tabela
+      total = 0;
+      document.querySelectorAll("#dividas tr").forEach(tr => {
+        const qtd = Number(tr.children[2].innerText);
+        const val = Number(tr.children[3].innerText.replace(",", "."));
+        total += qtd * val;
+      });
+
+      totalDividas.innerText = total.toFixed(2);
     });
-
-    totalDividas.innerText = total.toFixed(2);
-  });
 }
+
+
+
 
 
 function editarDivida(id, v, inc){
