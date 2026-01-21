@@ -14,9 +14,7 @@ const db = firebase.firestore();
 // ======================
 // LOGIN
 // ======================
-// ======================
-// LOGIN (CORRIGIDO)
-// ======================
+
 let usuarioLogado = null;
 
 function login() {
@@ -81,25 +79,31 @@ function addEntrada(){
   let data = prompt("Data (DDMMAAAA):");
 data = formatarData(data);
 if(!data) return;
- const nome = prompt("Material:");
+if (!validarDataNaoFutura(data)) return;
+ 
+const nome = prompt("Material:");
 if(!validarNome(nome)) return;
 
   const qtd = Number(prompt("Qtd:"));
   if(!data || !nome || qtd <= 0) return;
 
- db.collection("estoque")
-  .add({ data, nome, quantidade: qtd })
-  .then(() => {
-    registrarLog(
-      "Entrada de estoque",
-      `Material: ${nome}, Quantidade: ${qtd}`
-    );
-  });
+db.collection("estoque")
+  .add({
+    data,
+    nome,
+    quantidade: qtd,
+    dataOrdem: dataParaOrdem(data),
+    dataCriacao: firebase.firestore.FieldValue.serverTimestamp()
+  })
+
 }
 
 function carregarEstoque(){
   estoque.innerHTML = "";
-  db.collection("estoque").onSnapshot(s => {
+  db.collection("estoque")
+  .orderBy("dataOrdem", "desc")
+  .onSnapshot(s => {
+
     estoque.innerHTML = "";
     s.forEach(d => {
       const i = d.data();
@@ -143,6 +147,8 @@ function addSaida(){
   let data = prompt("Data (DDMMAAAA):");
 data = formatarData(data);
 if(!data) return;
+if (!validarDataNaoFutura(data)) return;
+
   const nome = prompt("Material:");
 if(!validarNome(nome)) return;
 
@@ -160,7 +166,14 @@ if(!validarNome(nome)) return;
       .update({ quantidade: e.data().quantidade - qtd });
 
    db.collection("saida")
-  .add({ data, nome, quantidade: qtd })
+  .add({
+    data,
+    nome,
+    quantidade: qtd,
+    dataOrdem: dataParaOrdem(data),
+    dataCriacao: firebase.firestore.FieldValue.serverTimestamp()
+  })
+
   .then(() => {
     registrarLog(
       "Saída",
@@ -173,7 +186,10 @@ if(!validarNome(nome)) return;
 
 function carregarSaida(){
   saida.innerHTML = "";
-  db.collection("saida").onSnapshot(s=>{
+  db.collection("saida")
+  .orderBy("dataOrdem", "desc")
+  .onSnapshot(s=>{
+
     saida.innerHTML = "";
     s.forEach(d=>{
       const i=d.data();
@@ -233,6 +249,7 @@ function addLaboratorio(){
   let data = prompt("Data (DDMMAAAA):");
   data = formatarData(data);
   if(!data) return;
+  if (!validarDataNaoFutura(data)) return;
 
   const n = prompt("Nome:");
 if(!validarNome(n)) return;
@@ -242,14 +259,21 @@ if(!validarNome(n)) return;
   if(!n || q <= 0) return;
 
   db.collection("laboratorio").add({
-    data: data,
-    nome: n,
-    quantidade: q
-  });
+  data,
+  nome: n,
+  quantidade: q,
+  dataOrdem: dataParaOrdem(data),
+  dataCriacao: firebase.firestore.FieldValue.serverTimestamp()
+});
+
 }
 function carregarLaboratorio(){
   laboratorio.innerHTML="";
-  db.collection("laboratorio").onSnapshot(s=>{
+  db.collection("laboratorio")
+  .orderBy("dataOrdem", "desc")
+  .onSnapshot(s=>{
+
+
     laboratorio.innerHTML="";
     s.forEach(d=>{
       const i=d.data();
@@ -262,7 +286,8 @@ function carregarLaboratorio(){
   <button onclick="alterarLaboratorio('${d.id}',1)">➕</button>
   <button onclick="alterarLaboratorio('${d.id}',-1)">➖</button>
   <button onclick="editarNome('laboratorio','${d.id}','${i.nome}')">✏️</button>
-  <button onclick="excluir('laboratorio','${d.id}')">🗑️</button>
+  
+   <button onclick="excluir('laboratorio','${d.id}')">🗑️</button>
  
 </td>
 
@@ -299,17 +324,24 @@ function addDivida(){
   let data = prompt("Data (DDMMAAAA):");
   data = formatarData(data);
   if(!data) return;
+  if (!validarDataNaoFutura(data)) return;
 
   const n = prompt("Nome:");
   if(!validarNome(n)) return;
 
-  const v = Number(prompt("Valor:"));
-  if(!n || v <= 0) return;
+  const qtd = Number(prompt("Quantidade:"));
+  if(qtd <= 0) return;
+
+  const v = Number(prompt("Valor unitário:"));
+  if(v <= 0) return;
 
   db.collection("dividas").add({
     data: data,
     nome: n,
-    valor: v
+    quantidade: qtd,
+    valor: v,
+    dataOrdem: dataParaOrdem(data),
+    dataCriacao: firebase.firestore.FieldValue.serverTimestamp()
   });
 }
 
@@ -318,18 +350,30 @@ function carregarDividas(){
   dividas.innerHTML = "";
   let total = 0;
 
-  db.collection("dividas").onSnapshot(snapshot => {
+  db.collection("dividas")
+    .orderBy("dataOrdem", "desc")
+    .onSnapshot(snapshot => {
+
     dividas.innerHTML = "";
     total = 0;
 
     snapshot.forEach(d => {
       const i = d.data();
-      total += i.valor;
+      const subtotal = (i.quantidade || 1) * i.valor;
+      total += subtotal;
 
       dividas.innerHTML += `
       <tr>
         <td>${i.data}</td>
         <td>${i.nome}</td>
+
+        <td ${
+          usuarioLogado?.tipo === "master"
+            ? `contenteditable onblur="editarQtdDivida('${d.id}', this.innerText)"`
+            : ""
+        }>
+          ${i.quantidade || 1}
+        </td>
 
         <td ${
           usuarioLogado?.tipo === "master"
@@ -343,10 +387,11 @@ function carregarDividas(){
           ${
             usuarioLogado?.tipo === "master"
               ? `
-                <button onclick="editarDivida('${d.id}',1,true)">➕</button>
-                <button onclick="editarDivida('${d.id}',-1,true)">➖</button>
-                <button onclick="editarNome('dividas','${d.id}','${i.nome}')">✏️</button>
-                <button onclick="excluir('dividas','${d.id}')">🗑️</button>
+              <button onclick="editarQtdDivida('${d.id}',1,true)">➕</button>
+              <button onclick="editarQtdDivida('${d.id}',-1,true)">➖</button>
+              <button onclick="editarNome('dividas','${d.id}','${i.nome}')">✏️</button>
+              <button onclick="editarValorDivida('${d.id}', ${i.valor})">💲</button>
+              <button onclick="excluir('dividas','${d.id}')">🗑️</button>
 
               `
               : '👁️'
@@ -380,6 +425,80 @@ r.get().then(d=>{
   });
 });
 }
+
+function editarValorDivida(id, valorAtual){
+  if(usuarioLogado?.tipo !== "master"){
+    alert("Somente o administrador pode alterar o valor");
+    return;
+  }
+
+  const novoValor = Number(prompt("Novo valor unitário:", valorAtual));
+
+  if(isNaN(novoValor) || novoValor < 0){
+    alert("Valor inválido");
+    return;
+  }
+
+  db.collection("dividas")
+    .doc(id)
+    .update({ valor: novoValor })
+    .then(() => {
+      registrarLog(
+        "Alteração dívida",
+        `${usuarioLogado.usuario} alterou VALOR da dívida | Novo valor: ${novoValor}`
+      );
+    });
+}
+
+
+function editarQtdDivida(id, v, inc){
+  if(usuarioLogado?.tipo !== "master"){
+    alert("Somente o administrador pode alterar dívidas");
+    return;
+  }
+
+  const r = db.collection("dividas").doc(id);
+
+  r.get().then(d => {
+    let n = inc ? (d.data().quantidade || 1) + v : Number(v);
+    if(n < 0) n = 0;
+
+    r.update({ quantidade: n }).then(() => {
+      registrarLog(
+        "Alteração dívida",
+        `${usuarioLogado.usuario} alterou QUANTIDADE da dívida | Nova qtd: ${n}`
+      );
+    });
+  });
+}
+
+// ======================
+// EDITAR QUANTIDADES
+// ======================
+function editarQuantidade(colecao, id, atual){
+  if(usuarioLogado?.tipo !== "master"){
+    alert("Acesso negado");
+    return;
+  }
+
+  const nova = Number(prompt("Nova quantidade:", atual));
+
+  if(isNaN(nova) || nova < 0){
+    alert("Quantidade inválida");
+    return;
+  }
+
+  db.collection(colecao)
+    .doc(id)
+    .update({ quantidade: nova })
+    .then(() => {
+      registrarLog(
+        "Alteração quantidade",
+        `${usuarioLogado.usuario} alterou quantidade em ${colecao} | Nova qtd: ${nova}`
+      );
+    });
+}
+
 // ======================
 // EXCLUIR
 // ======================
@@ -423,6 +542,26 @@ function formatarData(valor){
 
   return `${dia}/${mes}/${ano}`;
 }
+
+// FORMATAR DATA INVALIDA 
+function validarDataNaoFutura(dataFormatada) {
+  // dataFormatada = DD/MM/AAAA
+  const [dia, mes, ano] = dataFormatada.split("/").map(Number);
+
+  const dataInformada = new Date(ano, mes - 1, dia);
+  dataInformada.setHours(0,0,0,0);
+
+  const hoje = new Date();
+  hoje.setHours(0,0,0,0);
+
+  if (dataInformada > hoje) {
+    alert("❌ Data inválida.\nSó é permitido hoje ou datas anteriores.");
+    return false;
+  }
+
+  return true;
+}
+
 
 function validarNome(nome){
   // somente letras, acentos e espaços
@@ -620,4 +759,29 @@ function alterarSenhaMaster(){
       alert("Senha alterada com sucesso");
     });
 }
+
+function dataParaOrdem(data) {
+  const [dia, mes, ano] = data.split("/");
+  return Number(`${ano}${mes}${dia}`);
+}
+
+function migrarDatasParaOrdem() {
+  const colecoes = ["estoque", "saida", "laboratorio", "dividas"];
+
+  colecoes.forEach(c => {
+    db.collection(c).get().then(snapshot => {
+      snapshot.forEach(doc => {
+        const d = doc.data();
+        if (d.data && !d.dataOrdem) {
+          db.collection(c).doc(doc.id).update({
+            dataOrdem: dataParaOrdem(d.data)
+          });
+        }
+      });
+    });
+  });
+
+  alert("Migração concluída. Recarregue a página.");
+}
+
 
