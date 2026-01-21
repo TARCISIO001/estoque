@@ -337,3 +337,22 @@ td button:nth-child(5) { background: #b91c1c; }
     gap: 6px;
   }
 }
+
+/* ================= DESTAQUE DE ITEM NOVO ================= */
+
+@keyframes highlightAdd {
+  0% {
+    background-color: rgba(34,197,94,0.35);
+    box-shadow: 0 0 0 0 rgba(34,197,94,0.8);
+  }
+  100% {
+    background-color: transparent;
+    box-shadow: none;
+  }
+}
+
+/* linha recém adicionada */
+.tr-novo {
+  animation: highlightAdd 2.5s ease-out;
+  border-left: 5px solid #22c55e !important;
+}
