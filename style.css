@@ -429,10 +429,13 @@ tbody tr:hover {
 }
 
 #btnSair {
+  position: fixed;          /* fixa na tela */
+  top: 20px;                /* distância do topo */
+  right: 20px;              /* distância da direita */
   display: inline-flex;
   align-items: center;
   gap: 8px;                 /* espaço entre ícone e texto */
-  background: linear-gradient(135deg, #ff5f6d, #ffc371); /* gradiente moderno */
+  background: linear-gradient(135deg, #ff5f6d, #ffc371);
   color: #fff;
   border: none;
   padding: 12px 24px;
@@ -442,6 +445,7 @@ tbody tr:hover {
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+  z-index: 9999;            /* garante que fique acima de tudo */
 }
 
 #btnSair:hover {
@@ -458,4 +462,6 @@ tbody tr:hover {
 #btnSair .icon {
   font-size: 18px;
 }
+
+
 
