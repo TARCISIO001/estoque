@@ -429,32 +429,26 @@ tbody tr:hover {
 }
 
 #btnSair {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;                 /* espaço entre ícone e texto */
-  background: linear-gradient(135deg, #ff5f6d, #ffc371); /* gradiente moderno */
-  color: #fff;
+  background-color: #e74c3c; /* vermelho vibrante */
+  color: #fff;               /* texto branco */
   border: none;
-  padding: 12px 24px;
-  border-radius: 12px;
+  padding: 10px 20px;
+  border-radius: 8px;        /* cantos arredondados */
   font-size: 16px;
-  font-weight: 600;
+  font-weight: bold;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+  box-shadow: 0 4px 6px rgba(0,0,0,0.2);
 }
 
 #btnSair:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-  background: linear-gradient(135deg, #ff6f71, #ffb871);
+  background-color: #c0392b; /* vermelho mais escuro ao passar o mouse */
+  transform: translateY(-2px); /* leve efeito de “flutuar” */
+  box-shadow: 0 6px 8px rgba(0,0,0,0.3);
 }
 
 #btnSair:active {
-  transform: translateY(0);
-  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-}
+  transform: translateY(0);   /* efeito de clique */
+  box-shadow: 0 3px 4px rgba(0,0,0,0.2);
 
-#btnSair .icon {
-  font-size: 18px;
 }
