@@ -302,9 +302,10 @@ td button:nth-child(5) { background: #b91c1c; }
   td {
     flex-direction: column;
     align-items: flex-start;
-    gap: 4px;
+    gap: 12px;
     padding: 8px 6px;
   }
+ 
 
   /* Nome do campo (label) */
   td::before {
@@ -314,6 +315,7 @@ td button:nth-child(5) { background: #b91c1c; }
     text-transform: uppercase;
     color: #94a3b8;
   }
+
 
   /* Valor do campo */
   td {
@@ -392,3 +394,17 @@ table {
   border-left: 5px solid #22c55e;
 }
 
+/* Primeiro item da lista (mais recente) */
+tbody tr:first-child {
+  border-left-width: 7px;
+  filter: brightness(1.08);
+}
+
+
+
+
+tbody tr:hover {
+  transform: translateY(-2px);
+  transition: 0.2s ease;
+  box-shadow: 0 8px 22px rgba(0,0,0,0.6);
+}
