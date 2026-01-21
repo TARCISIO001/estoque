@@ -338,21 +338,57 @@ td button:nth-child(5) { background: #b91c1c; }
   }
 }
 
-/* ================= DESTAQUE DE ITEM NOVO ================= */
+/* ================= SEPARAÇÃO FORTE ENTRE REGISTROS ================= */
 
-@keyframes highlightAdd {
-  0% {
-    background-color: rgba(34,197,94,0.35);
-    box-shadow: 0 0 0 0 rgba(34,197,94,0.8);
+/* Desktop */
+@media (min-width: 900px) {
+  tbody tr {
+    background: #020617;
+    border: 1px solid #334155;       /* MAIS VIVO */
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
   }
-  100% {
-    background-color: transparent;
-    box-shadow: none;
+
+  tbody tr + tr {
+    margin-top: 14px;                /* ESPAÇO ENTRE REGISTROS */
+  }
+
+  tbody td {
+    padding: 12px;
   }
 }
 
-/* linha recém adicionada */
-.tr-novo {
-  animation: highlightAdd 2.5s ease-out;
-  border-left: 5px solid #22c55e !important;
+/* Mobile */
+@media (max-width: 899px) {
+  tr {
+    background: #020617;
+    border: 1px solid #475569;       /* ainda mais visível */
+    border-radius: 14px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.6);
+  }
+
+  tr + tr {
+    margin-top: 16px;
+  }
 }
+
+table {
+  border-collapse: separate;
+  border-spacing: 0 12px;
+}
+
+/* Dívidas: leve azul */
+#dividas tr {
+  border-left: 5px solid #3b82f6;
+}
+
+/* Saída: amarelo */
+#saida tr {
+  border-left: 5px solid #eab308;
+}
+
+/* Estoque: verde */
+#estoque tr {
+  border-left: 5px solid #22c55e;
+}
+
