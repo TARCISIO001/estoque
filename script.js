@@ -482,7 +482,7 @@ function carregarDividas(){
 
         // soma apenas o valor unitário (não multiplica pela quantidade)
         total += i.valor;
-          scrollMobileParaDividas();
+          
       });
 
       
@@ -935,23 +935,7 @@ function sair() {
   location.reload();
 }
 
-function scrollMobileParaLaboratorio() {
-  // só mobile
-  if (window.innerWidth >= 900) return;
 
-  const laboratorioBox = document.querySelector("#laboratorio");
-  if (!laboratorioBox) return;
 
-  // sobe até a box inteira
-  const box = laboratorioBox.closest(".box");
-  if (!box) return;
-
-  const y = box.getBoundingClientRect().top + window.pageYOffset;
-
-  window.scrollTo({
-    top: y - 80,
-    behavior: "smooth"
-  });
-}
 
 
