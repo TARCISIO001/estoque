@@ -482,7 +482,7 @@ function carregarDividas(){
 
         // soma apenas o valor unitário (não multiplica pela quantidade)
         total += i.valor;
-          scrollMobileParaLaboratorio();
+          scrollMobileParaDividas();
       });
 
       
@@ -953,4 +953,5 @@ function scrollMobileParaLaboratorio() {
     behavior: "smooth"
   });
 }
+
 
