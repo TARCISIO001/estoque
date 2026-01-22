@@ -458,16 +458,17 @@ tbody tr:hover {
   transition: all 0.3s ease;
 }
 
-/* SOMENTE NO CELULAR */
 @media (max-width: 900px) {
 
   .box {
-    max-height: 220px;   /* altura normal */
+    max-height: 180px;   /* ainda menor quando fechada */
     overflow: hidden;
   }
 
   .box.box-ativa {
-    max-height: 1000px; /* cresce pra cima */
+    max-height: 2000px;  /* sobe MUITO mais */
   }
 }
+
+
 
