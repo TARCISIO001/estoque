@@ -483,9 +483,10 @@ function carregarDividas(){
         // soma apenas o valor unitário (não multiplica pela quantidade)
         total += i.valor;
 
-        ajustarScrollMobileAposCrescer();
-
       });
+
+      scrollMobileParaLaboratorio();
+
           
        totalDividasElement.innerText = total.toFixed(2);
    
@@ -934,27 +935,21 @@ function sair() {
   location.reload();
 }
 
-let alturaAnteriorPagina = document.body.scrollHeight;
-
-function ajustarScrollMobileAposCrescer() {
-  // só no mobile
+function scrollMobileParaLaboratorio() {
+  // só mobile
   if (window.innerWidth >= 900) return;
 
-  setTimeout(() => {
-    const alturaNova = document.body.scrollHeight;
+  const laboratorioBox = document.querySelector("#laboratorio");
+  if (!laboratorioBox) return;
 
-    // só faz algo se a página realmente cresceu
-    if (alturaNova > alturaAnteriorPagina) {
-      const laboratorio = document.querySelector("#laboratorio")?.closest(".box");
-      if (laboratorio) {
-        laboratorio.scrollIntoView({
-          behavior: "smooth",
-          block: "center"
-        });
-      }
-    }
+  // sobe até a box inteira
+  const box = laboratorioBox.closest(".box");
+  if (!box) return;
 
-    alturaAnteriorPagina = alturaNova;
-  }, 200); // espera o Firestore renderizar
+  const y = box.getBoundingClientRect().top + window.pageYOffset;
+
+  window.scrollTo({
+    top: y - 80,
+    behavior: "smooth"
+  });
 }
-
