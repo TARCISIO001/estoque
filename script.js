@@ -417,12 +417,16 @@ function addDivida(){
     valor: v,
     dataOrdem: dataParaOrdem(data),
     dataCriacao: firebase.firestore.FieldValue.serverTimestamp()
-  });
+  })
+.then(() => {
+  scrollAteLaboratorioMobile();
+});
+
 }
 
-
 function carregarDividas(){
-  
+  const containerEstoque = document.querySelector("#dividas").parentElement;
+
   const dividasElement = document.getElementById("dividas");
   const totalDividasElement = document.getElementById("totalDividas");
 
@@ -431,6 +435,8 @@ function carregarDividas(){
   db.collection("dividas")
     .orderBy("dataOrdem", "desc")
     .onSnapshot(snapshot => {
+
+    
 
       dividasElement.innerHTML = ""; // limpa todas linhas e adiciona de novo
       let total = 0;
@@ -483,9 +489,10 @@ function carregarDividas(){
         total += i.valor;
       });
 
-    
-      totalDividasElement.innerText = total.toFixed(2);
+       totalDividasElement.innerText = total.toFixed(2);
+   
 
+ 
       // 🔢 recalcula total SEM apagar tabela
       total = 0;
       document.querySelectorAll("#dividas tr").forEach(tr => {
@@ -668,6 +675,7 @@ function validarNome(nome){
   }
   return true;
 }
+
   //VALIDAR NOME
 function editarNome(colecao, id, nomeAtual){
   const novoNome = prompt("Editar nome:", nomeAtual);
@@ -928,4 +936,10 @@ function sair() {
   location.reload();
 }
 
+function manterScroll(container, alturaAntes, scrollAntes) {
+  const alturaDepois = container.scrollHeight;
+  const diferenca = alturaDepois - alturaAntes;
 
+  // mantém visualmente o conteúdo no mesmo lugar
+  container.scrollTop = scrollAntes + diferenca;
+}
