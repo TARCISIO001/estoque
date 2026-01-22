@@ -460,10 +460,11 @@ tbody tr:hover {
     overflow: hidden;
   }
 
-  .box.box-ativa {
-    max-height: 100vh;
-  }
+ .box.box-ativa {
+  max-height: 100vh;
 }
+}
+
 
 
 
