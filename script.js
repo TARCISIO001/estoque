@@ -935,6 +935,29 @@ function sair() {
   location.reload();
 }
 
+// ======================
+// EXPANDIR BOX NO MOBILE
+// ======================
+document.addEventListener("DOMContentLoaded", () => {
+
+  if (window.innerWidth > 900) return; // só celular
+
+  const boxes = document.querySelectorAll(".box");
+
+  boxes.forEach(box => {
+
+    box.addEventListener("touchstart", () => {
+      // remove expansão das outras
+      boxes.forEach(b => b.classList.remove("box-ativa"));
+
+      // ativa a tocada
+      box.classList.add("box-ativa");
+    });
+
+  });
+
+});
+
 
 
 
