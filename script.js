@@ -664,9 +664,9 @@ function validarDataNaoFutura(dataFormatada) {
 
 
 function validarNome(nome){
-  // somente letras, acentos e espaços
-  if(!/^[A-Za-zÀ-ÿ\s]+$/.test(nome)){
-    alert("Erro: o nome deve conter somente letras e espaços.");
+  // permite letras, números, acentos e espaços
+  if(!/^[A-Za-zÀ-ÿ0-9\s]+$/.test(nome)){
+    alert("Erro: o nome pode conter letras, números e espaços.");
     return false;
   }
   return true;
@@ -930,3 +930,4 @@ function sair() {
   localStorage.removeItem("usuarioLogado");
   location.reload();
 }
+
