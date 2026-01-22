@@ -420,43 +420,31 @@ function addDivida(){
   });
 }
 
+
 function carregarDividas(){
-  let total = 0;
-  const linhas = {}; // cache local das linhas
+  const containerEstoque = document.querySelector("#dividas").parentElement;
+
+  const dividasElement = document.getElementById("dividas");
+  const totalDividasElement = document.getElementById("totalDividas");
+
+  if(!dividasElement || !totalDividasElement) return;
 
   db.collection("dividas")
     .orderBy("dataOrdem", "desc")
     .onSnapshot(snapshot => {
 
-      // percorre mudanças
-      snapshot.docChanges().forEach(change => {
-        const d = change.doc;
-        const i = d.data();
+      const scrollAntes = containerEstoque.scrollTop;
+      const alturaAntes = containerEstoque.scrollHeight;
 
-        // 🔴 REMOVIDO
-        if (change.type === "removed") {
-          const tr = document.getElementById("divida-" + d.id);
-          if (tr) tr.remove();
-          return;
-        }
+      dividasElement.innerHTML = ""; // limpa todas linhas e adiciona de novo
+      let total = 0;
 
-        // 🔵 CRIAR ou ATUALIZAR linha
-        let tr = document.getElementById("divida-" + d.id);
+      snapshot.forEach(doc => {
+        const i = doc.data();
+        const d = doc.id;
 
-        if (!tr) {
-          tr = document.createElement("tr");
-          tr.id = "divida-" + d.id;
-          dividas.prepend(tr); // 👉 novas sempre no topo
-        }
-
-        // 🔥 destaque somente para NEW ou MODIFIED
-        if (change.type === "added" || change.type === "modified") {
-          tr.classList.remove("tr-qtd"); // força reset
-          void tr.offsetWidth; // reflow
-          tr.classList.add("tr-qtd");
-        }
-
-        const subtotal = (i.quantidade || 1) * i.valor;
+        const tr = document.createElement("tr");
+        tr.id = "divida-" + d;
 
         tr.innerHTML = `
           <td>${i.data}</td>
@@ -464,30 +452,45 @@ function carregarDividas(){
 
           <td ${
             usuarioLogado?.tipo === "master"
-              ? `contenteditable onblur="editarQtdDivida('${d.id}', this.innerText)"`
+              ? `contenteditable onblur="editarQtdDivida('${d}', this.innerText)"`
               : ""
           }>
             ${i.quantidade || 1}
           </td>
 
-          <td>${i.valor.toFixed(2)}</td>
+          <td ${
+            usuarioLogado?.tipo === "master"
+              ? `contenteditable onblur="editarValorDivida('${d}', this.innerText)"`
+              : ""
+          }>
+            ${i.valor.toFixed(2)}
+          </td>
 
           <td>
             ${
               usuarioLogado?.tipo === "master"
                 ? `
-                  <button onclick="editarQtdDivida('${d.id}',1,true)">➕</button>
-                  <button onclick="editarQtdDivida('${d.id}',-1,true)">➖</button>
-                  <button onclick="editarNome('dividas','${d.id}','${i.nome}')">✏️</button>
-                  <button onclick="editarValorDivida('${d.id}', ${i.valor})">💲</button>
-                  <button onclick="excluir('dividas','${d.id}')">🗑️</button>
+                  <button onclick="editarQtdDivida('${d}',1,true)">➕</button>
+                  <button onclick="editarQtdDivida('${d}',-1,true)">➖</button>
+                  <button onclick="editarNome('dividas','${d}','${i.nome}')">✏️</button>
+                  <button onclick="editarValorDivida('${d}', ${i.valor})">💲</button>
+                  <button onclick="excluir('dividas','${d}')">🗑️</button>
                 `
                 : '👁️'
             }
           </td>
         `;
 
+        dividasElement.prepend(tr);
+
+        // soma apenas o valor unitário (não multiplica pela quantidade)
+        total += i.valor;
       });
+
+      manterScroll(containerSaida, alturaAntes, scrollAntes);
+
+
+      totalDividasElement.innerText = total.toFixed(2);
 
       // 🔢 recalcula total SEM apagar tabela
       total = 0;
@@ -930,4 +933,5 @@ function sair() {
   localStorage.removeItem("usuarioLogado");
   location.reload();
 }
+
 
