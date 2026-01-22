@@ -417,10 +417,7 @@ function addDivida(){
     valor: v,
     dataOrdem: dataParaOrdem(data),
     dataCriacao: firebase.firestore.FieldValue.serverTimestamp()
-  })
-.then(() => {
-  scrollAteLaboratorioMobile();
-});
+  });
 
 }
 
@@ -436,9 +433,7 @@ function carregarDividas(){
     .orderBy("dataOrdem", "desc")
     .onSnapshot(snapshot => {
 
-    
-
-      dividasElement.innerHTML = ""; // limpa todas linhas e adiciona de novo
+       dividasElement.innerHTML = ""; // limpa todas linhas e adiciona de novo
       let total = 0;
 
       snapshot.forEach(doc => {
@@ -487,8 +482,11 @@ function carregarDividas(){
 
         // soma apenas o valor unitário (não multiplica pela quantidade)
         total += i.valor;
-      });
 
+        ajustarScrollMobileAposCrescer();
+
+      });
+          
        totalDividasElement.innerText = total.toFixed(2);
    
 
@@ -936,10 +934,27 @@ function sair() {
   location.reload();
 }
 
-function manterScroll(container, alturaAntes, scrollAntes) {
-  const alturaDepois = container.scrollHeight;
-  const diferenca = alturaDepois - alturaAntes;
+let alturaAnteriorPagina = document.body.scrollHeight;
 
-  // mantém visualmente o conteúdo no mesmo lugar
-  container.scrollTop = scrollAntes + diferenca;
+function ajustarScrollMobileAposCrescer() {
+  // só no mobile
+  if (window.innerWidth >= 900) return;
+
+  setTimeout(() => {
+    const alturaNova = document.body.scrollHeight;
+
+    // só faz algo se a página realmente cresceu
+    if (alturaNova > alturaAnteriorPagina) {
+      const laboratorio = document.querySelector("#laboratorio")?.closest(".box");
+      if (laboratorio) {
+        laboratorio.scrollIntoView({
+          behavior: "smooth",
+          block: "center"
+        });
+      }
+    }
+
+    alturaAnteriorPagina = alturaNova;
+  }, 200); // espera o Firestore renderizar
 }
+
