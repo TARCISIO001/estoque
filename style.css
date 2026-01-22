@@ -452,3 +452,22 @@ tbody tr:hover {
   box-shadow: 0 3px 4px rgba(0,0,0,0.2);
 
 }
+
+/* comportamento padrão */
+.box {
+  transition: all 0.3s ease;
+}
+
+/* SOMENTE NO CELULAR */
+@media (max-width: 900px) {
+
+  .box {
+    max-height: 220px;   /* altura normal */
+    overflow: hidden;
+  }
+
+  .box.box-ativa {
+    max-height: 1000px; /* cresce pra cima */
+  }
+}
+
