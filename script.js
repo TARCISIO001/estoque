@@ -257,12 +257,20 @@ function carregarSaida(){
           <td>${i.data}</td>
           <td>${i.nome}</td>
           <td>${i.quantidade}</td>
-          <td>
-            <button onclick="alterarSaida('${d.id}',1)">➕</button>
-            <button onclick="alterarSaida('${d.id}',-1)">➖</button>
-            <button onclick="editarNome('saida','${d.id}','${i.nome}')">✏️</button>
-            <button onclick="excluir('saida','${d.id}')">🗑️</button>
-          </td>
+         <td>
+  <button onclick="alterarSaida('${d.id}',1)">➕</button>
+  <button onclick="alterarSaida('${d.id}',-1)">➖</button>
+  <button onclick="editarNome('saida','${d.id}','${i.nome}')">✏️</button>
+
+  ${
+    usuarioLogado?.tipo === "master"
+      ? `<button onclick="enviarParaLaboratorio('${d.id}')">🧪</button>`
+      : ""
+  }
+
+  <button onclick="excluir('saida','${d.id}')">🗑️</button>
+</td>
+
         `;
       });
     });
@@ -298,6 +306,43 @@ function alterarSaida(id, v){
           );
         });
       });
+  });
+}
+
+// ======================
+// ENVIAR PARA LABORATORIO
+// ======================
+function enviarParaLaboratorio(idSaida){
+  if(usuarioLogado?.tipo !== "master"){
+    alert("Somente o administrador pode enviar para o laboratório");
+    return;
+  }
+
+  const r = db.collection("saida").doc(idSaida);
+
+  r.get().then(doc=>{
+    if(!doc.exists){
+      alert("Registro não encontrado");
+      return;
+    }
+
+    const d = doc.data();
+
+    db.collection("laboratorio").add({
+      data: d.data,
+      nome: d.nome,
+      quantidade: d.quantidade,
+      dataOrdem: d.dataOrdem,
+      dataCriacao: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(()=>{
+      registrarLog(
+        "Laboratório",
+        `${usuarioLogado.usuario} enviou para laboratório | Material: ${d.nome} | Qtd: ${d.quantidade}`
+      );
+
+      alert("Enviado para o laboratório com sucesso 🧪");
+    });
+
   });
 }
 
@@ -957,6 +1002,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
 });
+
 
 
 
