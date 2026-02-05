@@ -14,11 +14,13 @@
 <body class="login-page">
 
 <!-- LOGIN -->
-<div id="login" class="login">
+<div id="telaLogin" class="login">
   <h2>BEM VINDO AO ESTOQUE</h2>
   <input type="text" id="usuario" placeholder="Usuário">
   <input type="password" id="senha" placeholder="Senha">
-  <button onclick="login()">Entrar</button>
+<button onclick="fazerLogin()">Entrar</button>
+
+
 </div>
 
 <!-- SISTEMA -->
@@ -142,31 +144,58 @@
     </div>
 
     <!-- DÍVIDAS -->
-    <div class="box">
-      <h2>DÍVIDAS</h2>
-      <h3>Saldo: R$ <span id="totalDividas">0.00</span></h3>
-      <button onclick="addDivida()">Adicionar</button>
+<div class="box">
+  <h2>DÍVIDAS</h2>
 
-      <div class="table-scroll">
-        <table>
-          <thead>
-            <tr>
-              <th>Data</th>
-              <th>Nome</th>
-              <th>Qtd</th> 
-              <th>Valor</th>
-              <th>Ações</th>
-            </tr>
-          </thead>
-          <tbody id="dividas"></tbody>
-        </table>
-      </div>
-    </div>
+  <h3>Saldo: R$ <span id="totalDividas">0.00</span></h3>
 
+  <p class="dividas-resumo">
+    Total: R$ <span id="totalDividasBruto">0.00</span>
+    &nbsp;|&nbsp;
+    Abatido: R$ <span id="totalAbatidoDividas">0.00</span>
+  </p>
+
+  <div class="dividas-acoes">
+    <button onclick="addDivida()">Adicionar</button>
+    <button id="btnAbaterDividas" onclick="abaterDividas()">💸 Abater</button>
+  </div>
+
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr>
+          <th>Data</th>
+          <th>Nome</th>
+          <th>Qtd</th>
+          <th>Valor</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody id="dividas"></tbody>
+    </table>
+  </div>
+
+  <h4 class="subtitulo">Pagamentos / Abatimentos</h4>
+
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr>
+          <th>Data</th>
+          <th>Valor</th>
+          <th>Obs</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody id="listaAbatimentosDividas"></tbody>
+    </table>
   </div>
 </div>
 
-<script src="script.js"></script>
+
+<script src="./script.js.js"></script>
+
 </body>
 </html>
+
 
