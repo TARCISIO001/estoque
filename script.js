@@ -16,6 +16,11 @@ const db = firebase.firestore();
 // ======================
 
 let usuarioLogado = null;
+// total das dívidas (quantidade * valor)
+let totalDividasBruto = 0;
+// total já abatido/pago
+let totalAbatidoDividas = 0;
+
 
 // TEMPO DE INATIVIDADE PARA LOGOUT (10 minutos)
 const TEMPO_LIMITE = 10 * 60 * 1000; // 10 minutos em milissegundos
@@ -33,7 +38,8 @@ function resetarTimer() {
 }
 
 
-function login() {
+function fazerLogin() 
+{
   const usuario = document.getElementById("usuario").value.trim();
   const senha = document.getElementById("senha").value.trim();
 
@@ -64,7 +70,8 @@ function login() {
 );
       
 // troca telas
-      document.getElementById("login").style.display = "none";
+      document.getElementById("telaLogin").style.display = "none";
+
       document.getElementById("sistema").style.display = "block";
 
       // área admin
@@ -84,6 +91,7 @@ function login() {
       carregarSaida();
       carregarLaboratorio();
       carregarDividas();
+      carregarAbatimentosDividas();
     })
     .catch(err => {
       console.error(err);
@@ -432,9 +440,14 @@ function alterarLaboratorio(id, v){
 }
 
 
+/// ======================
+// DÍVIDAS (COM ABATIMENTO)
 // ======================
-// DÍVIDAS
-// ======================
+
+// (você já declarou essas 2 variáveis no topo do arquivo, então NÃO repita)
+// let totalDividasBruto = 0;
+// let totalAbatidoDividas = 0;
+
 function addDivida(){
   if(usuarioLogado?.tipo !== "master"){
     alert("Somente o administrador pode adicionar dívidas");
@@ -450,10 +463,10 @@ function addDivida(){
   if(!validarNome(n)) return;
 
   const qtd = Number(prompt("Quantidade:"));
-  if(qtd <= 0) return;
+  if(isNaN(qtd) || qtd <= 0) return;
 
-  const v = Number(prompt("Valor unitário:"));
-  if(v <= 0) return;
+  const v = Number(String(prompt("Valor unitário:")).replace(",", "."));
+  if(isNaN(v) || v <= 0) return;
 
   db.collection("dividas").add({
     data: data,
@@ -463,124 +476,141 @@ function addDivida(){
     dataOrdem: dataParaOrdem(data),
     dataCriacao: firebase.firestore.FieldValue.serverTimestamp()
   });
-
 }
 
 function carregarDividas(){
-  const containerEstoque = document.querySelector("#dividas").parentElement;
-
   const dividasElement = document.getElementById("dividas");
-  const totalDividasElement = document.getElementById("totalDividas");
-
-  if(!dividasElement || !totalDividasElement) return;
+  if(!dividasElement) return;
 
   db.collection("dividas")
     .orderBy("dataOrdem", "desc")
     .onSnapshot(snapshot => {
 
-       dividasElement.innerHTML = ""; // limpa todas linhas e adiciona de novo
-      let total = 0;
+      dividasElement.innerHTML = "";
+      totalDividasBruto = 0;
 
       snapshot.forEach(doc => {
         const i = doc.data();
-        const d = doc.id;
+        const id = doc.id;
+
+        const qtd = Number(i.quantidade ?? 0);
+        const valor = Number(i.valor ?? 0);
+
+        const qtdOk = isNaN(qtd) ? 0 : qtd;
+        const valorOk = isNaN(valor) ? 0 : valor;
+
+        totalDividasBruto += qtdOk * valorOk;
 
         const tr = document.createElement("tr");
-        tr.id = "divida-" + d;
+        tr.id = "divida-" + id;
 
         tr.innerHTML = `
-          <td>${i.data}</td>
-          <td>${i.nome}</td>
+          <td>${i.data || ""}</td>
+          <td>${i.nome || ""}</td>
 
           <td ${
             usuarioLogado?.tipo === "master"
-              ? `contenteditable onblur="editarQtdDivida('${d}', this.innerText)"`
+              ? `contenteditable
+                 onfocus="this.dataset.prev=this.innerText"
+                 onblur="salvarQtdDivida('${id}', this)"`
               : ""
-          }>
-            ${i.quantidade || 1}
-          </td>
+          }>${qtdOk}</td>
 
           <td ${
             usuarioLogado?.tipo === "master"
-              ? `contenteditable onblur="editarValorDivida('${d}', this.innerText)"`
+              ? `contenteditable
+                 onfocus="this.dataset.prev=this.innerText"
+                 onblur="salvarValorDivida('${id}', this)"`
               : ""
-          }>
-            ${i.valor.toFixed(2)}
-          </td>
+          }>${valorOk.toFixed(2)}</td>
 
           <td>
             ${
               usuarioLogado?.tipo === "master"
                 ? `
-                  <button onclick="editarQtdDivida('${d}',1,true)">➕</button>
-                  <button onclick="editarQtdDivida('${d}',-1,true)">➖</button>
-                  <button onclick="editarNome('dividas','${d}','${i.nome}')">✏️</button>
-                  <button onclick="editarValorDivida('${d}', ${i.valor})">💲</button>
-                  <button onclick="excluir('dividas','${d}')">🗑️</button>
+                  <button onclick="editarQtdDivida('${id}',1,true)">➕</button>
+                  <button onclick="editarQtdDivida('${id}',-1,true)">➖</button>
+                  <button onclick="editarNome('dividas','${id}','${(i.nome || "").replace(/"/g, '\\"')}')">✏️</button>
+                  <button onclick="editarValorDivida('${id}', ${valorOk})">💲</button>
+                  <button onclick="excluir('dividas','${id}')">🗑️</button>
                 `
-                : '👁️'
+                : "👁️"
             }
           </td>
         `;
 
-        dividasElement.prepend(tr);
-
-        // soma apenas o valor unitário (não multiplica pela quantidade)
-        total += i.valor;
-          
+        // como o orderBy já vem desc, APPEND mantém a ordem certa
+        dividasElement.appendChild(tr);
       });
 
-      
-
-          
-       totalDividasElement.innerText = total.toFixed(2);
-   
-
- 
-      // 🔢 recalcula total SEM apagar tabela
-      total = 0;
-      document.querySelectorAll("#dividas tr").forEach(tr => {
-        const qtd = Number(tr.children[2].innerText);
-        const val = Number(tr.children[3].innerText.replace(",", "."));
-        total += qtd * val;
-      });
-
-      totalDividas.innerText = total.toFixed(2);
+      atualizarSaldoDividas();
+    }, err => {
+      console.error("Erro ao ler dividas:", err);
     });
 }
 
+// salva quantidade digitada direto na célula
+function salvarQtdDivida(id, tdEl){
+  if(usuarioLogado?.tipo !== "master") return;
 
+  const txt = String(tdEl.innerText || "").trim();
+  const n = Number(txt);
 
-
-
-function editarDivida(id, v, inc){
-  if(usuarioLogado?.tipo !== "master"){
-    alert("Somente o administrador pode alterar dívidas");
+  if(isNaN(n) || n < 0){
+    alert("Quantidade inválida");
+    tdEl.innerText = tdEl.dataset.prev ?? "";
     return;
   }
 
-  const r = db.collection("dividas").doc(id);
-
-r.get().then(d=>{
-  let n = inc ? d.data().valor + v : Number(v);
-  if(n < 0) n = 0;
-
-  r.update({ valor: n }).then(()=>{
-    registrarLog(
-      "Alteração dívida",
-      `${usuarioLogado.usuario} alterou dívida | Novo valor: ${n}`
-    );
-  });
-});
+  db.collection("dividas").doc(id).update({ quantidade: n })
+    .then(() => {
+      registrarLog(
+        "Alteração dívida",
+        `${usuarioLogado.usuario} alterou QUANTIDADE da dívida | Nova qtd: ${n}`
+      );
+    })
+    .catch(err => {
+      console.error(err);
+      alert("Erro ao salvar quantidade");
+      tdEl.innerText = tdEl.dataset.prev ?? "";
+    });
 }
 
+// salva valor digitado direto na célula
+function salvarValorDivida(id, tdEl){
+  if(usuarioLogado?.tipo !== "master") return;
+
+  const txt = String(tdEl.innerText || "").trim().replace(",", ".");
+  const n = Number(txt);
+
+  if(isNaN(n) || n < 0){
+    alert("Valor inválido");
+    tdEl.innerText = tdEl.dataset.prev ?? "0.00";
+    return;
+  }
+
+  db.collection("dividas").doc(id).update({ valor: n })
+    .then(() => {
+      registrarLog(
+        "Alteração dívida",
+        `${usuarioLogado.usuario} alterou VALOR da dívida | Novo valor: ${n}`
+      );
+    })
+    .catch(err => {
+      console.error(err);
+      alert("Erro ao salvar valor");
+      tdEl.innerText = tdEl.dataset.prev ?? "0.00";
+    });
+}
+
+// botão 💲 (mantém o seu padrão com prompt)
 function editarValorDivida(id, valorAtual){
   if(usuarioLogado?.tipo !== "master"){
     alert("Somente o administrador pode alterar o valor");
     return;
   }
 
-  const novoValor = Number(prompt("Novo valor unitário:", valorAtual));
+  const novoValor = Number(String(prompt("Novo valor unitário:", valorAtual)).replace(",", "."));
 
   if(isNaN(novoValor) || novoValor < 0){
     alert("Valor inválido");
@@ -598,7 +628,6 @@ function editarValorDivida(id, valorAtual){
     });
 }
 
-
 function editarQtdDivida(id, v, inc){
   if(usuarioLogado?.tipo !== "master"){
     alert("Somente o administrador pode alterar dívidas");
@@ -609,7 +638,7 @@ function editarQtdDivida(id, v, inc){
 
   r.get().then(d => {
     let n = inc ? (d.data().quantidade || 1) + v : Number(v);
-    if(n < 0) n = 0;
+    if(isNaN(n) || n < 0) n = 0;
 
     r.update({ quantidade: n }).then(() => {
       registrarLog(
@@ -618,6 +647,127 @@ function editarQtdDivida(id, v, inc){
       );
     });
   });
+}
+
+// ===== saldo = total bruto - total imply abatido =====
+function atualizarSaldoDividas(){
+  const elSaldo = document.getElementById("totalDividas");
+  const elTotal = document.getElementById("totalDividasBruto");
+  const elAbatido = document.getElementById("totalAbatidoDividas");
+
+  if(elTotal) elTotal.innerText = totalDividasBruto.toFixed(2);
+  if(elAbatido) elAbatido.innerText = totalAbatidoDividas.toFixed(2);
+
+  const saldo = Math.max(0, totalDividasBruto - totalAbatidoDividas);
+  if(elSaldo) elSaldo.innerText = saldo.toFixed(2);
+}
+
+function abaterDividas(){
+  if(usuarioLogado?.tipo !== "master"){
+    alert("Somente o administrador pode abater dívidas");
+    return;
+  }
+
+  const saldoAtual = Math.max(0, totalDividasBruto - totalAbatidoDividas);
+  if(saldoAtual <= 0){
+    alert("Não há saldo de dívidas para abater.");
+    return;
+  }
+
+  let valor = prompt(`Quanto deseja abater/pagar?\nSaldo atual: R$ ${saldoAtual.toFixed(2)}`);
+  if(valor === null) return;
+
+  valor = Number(String(valor).replace(",", "."));
+  if(isNaN(valor) || valor <= 0){
+    alert("Valor inválido");
+    return;
+  }
+
+  if(valor > saldoAtual){
+    alert("O valor informado é maior que o saldo atual.");
+    return;
+  }
+
+  const obs = prompt("Observação (opcional):") || "";
+
+  db.collection("abatimentosDividas").add({
+    valor: valor,
+    obs: obs,
+    data: new Date().toLocaleDateString("pt-BR"),
+    usuario: usuarioLogado?.usuario || "desconhecido",
+    dataCriacao: firebase.firestore.FieldValue.serverTimestamp()
+  })
+  .then(() => {
+    registrarLog(
+      "Abate dívida",
+      `${usuarioLogado.usuario} abateu R$ ${valor.toFixed(2)}${obs ? ` | Obs: ${obs}` : ""}`
+    );
+  })
+  .catch(err => {
+    console.error(err);
+    alert("Erro ao registrar abatimento");
+  });
+}
+
+function carregarAbatimentosDividas(){
+  // pode ser null se você ainda não colocou a tabela no HTML
+  const lista = document.getElementById("listaAbatimentosDividas");
+
+  db.collection("abatimentosDividas")
+    .orderBy("dataCriacao", "desc")
+    .onSnapshot(snapshot => {
+
+      if(lista) lista.innerHTML = "";
+      totalAbatidoDividas = 0;
+
+      snapshot.forEach(doc => {
+        const a = doc.data();
+        const id = doc.id;
+
+        const valor = Number(a.valor ?? 0);
+        const valorOk = isNaN(valor) ? 0 : valor;
+        totalAbatidoDividas += valorOk;
+
+        if(lista){
+          const tr = document.createElement("tr");
+          tr.id = "abatimento-" + id;
+
+          tr.innerHTML = `
+            <td>${a.data || ""}</td>
+            <td>${valorOk.toFixed(2)}</td>
+            <td>${a.obs || ""}</td>
+            <td>
+              ${
+                usuarioLogado?.tipo === "master"
+                  ? `<button onclick="excluirAbatimentoDividas('${id}')">🗑️</button>`
+                  : "👁️"
+              }
+            </td>
+          `;
+          lista.appendChild(tr);
+        }
+      });
+
+      atualizarSaldoDividas();
+    }, err => {
+      console.error("Erro ao ler abatimentosDividas:", err);
+    });
+}
+
+function excluirAbatimentoDividas(id){
+  if(usuarioLogado?.tipo !== "master"){
+    alert("Somente o administrador pode excluir abatimentos");
+    return;
+  }
+
+  if(confirm("Excluir abatimento?")){
+    db.collection("abatimentosDividas").doc(id).delete().then(()=>{
+      registrarLog(
+        "Exclusão",
+        `${usuarioLogado.usuario} excluiu um abatimento de dívidas`
+      );
+    });
+  }
 }
 
 // ======================
@@ -946,8 +1096,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (salvo) {
     usuarioLogado = JSON.parse(salvo);
+document.getElementById("telaLogin").style.display = "none";
 
-    document.getElementById("login").style.display = "none";
     document.getElementById("sistema").style.display = "block";
 
     if (usuarioLogado.tipo === "master") {
@@ -963,6 +1113,8 @@ document.addEventListener("DOMContentLoaded", () => {
     carregarSaida();
     carregarLaboratorio();
     carregarDividas();
+    carregarAbatimentosDividas();
+
 
     // 🔑 inicia o timer automático de logout
     resetarTimer();
@@ -1002,6 +1154,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
 });
+
 
 
 
