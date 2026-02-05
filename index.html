@@ -1,201 +1,194 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Controle de Estoque</title>
 
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css" />
 
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 </head>
 
 <body class="login-page">
-
-<!-- LOGIN -->
-<div id="telaLogin" class="login">
-  <h2>BEM VINDO AO ESTOQUE</h2>
-  <input type="text" id="usuario" placeholder="Usuário">
-  <input type="password" id="senha" placeholder="Senha">
-<button onclick="fazerLogin()">Entrar</button>
-
-
-</div>
-
-<!-- SISTEMA -->
-<div id="sistema" class="sistema" style="display:none">
- <h1 class="titulo">
-  CONTROLE DE ESTOQUE
-  <button id="btnSair" onclick="sair()">
-  <span class="icon">🚪</span> Sair
-</button>
-
-</h1>
+  <!-- LOGIN -->
+  <div id="telaLogin" class="login">
+    <h2>BEM VINDO AO ESTOQUE</h2>
+    <input type="text" id="usuario" placeholder="Usuário" autocomplete="username" />
+    <input type="password" id="senha" placeholder="Senha" autocomplete="current-password" />
+    <button type="button" id="btnEntrar">Entrar</button>
 
 
-  <!-- LOGS -->
-  <div id="areaLogs" class="box" style="display:none">
-    <h2>Logs de Alterações</h2>
-
-    <div class="table-scroll">
-      <table>
-        <thead>
-          <tr>
-            <th>Usuário</th>
-            <th>Ação</th>
-            <th>Detalhes</th>
-            <th>Data</th>
-          </tr>
-        </thead>
-        <tbody id="listaLogs"></tbody>
-      </table>
-    </div>
   </div>
 
-  <!-- ADMIN -->
-  <div id="areaAdmin" class="box" style="display:none; margin-top: 20px;">
-    <h2>Usuários Cadastrados</h2>
+  <!-- SISTEMA -->
+  <div id="sistema" class="sistema" style="display:none">
+    <h1 class="titulo">
+      CONTROLE DE ESTOQUE
+      <button id="btnSair" type="button" onclick="sair()">
+        <span class="icon">🚪</span> Sair
+      </button>
+    </h1>
 
-    <div class="table-scroll">
-      <table>
-        <thead>
-          <tr>
-            <th>Usuário</th>
-            <th>Tipo</th>
-            <th>Ações</th>
-          </tr>
-        </thead>
-        <tbody id="listaUsuarios"></tbody>
-      </table>
+    <!-- LOGS -->
+    <div id="areaLogs" class="box" style="display:none">
+      <h2>Logs de Alterações</h2>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Usuário</th>
+              <th>Ação</th>
+              <th>Detalhes</th>
+              <th>Data</th>
+            </tr>
+          </thead>
+          <tbody id="listaLogs"></tbody>
+        </table>
+      </div>
     </div>
 
-    <h3 style="margin-top: 10px;">Cadastro de Usuários</h3>
-    <button onclick="criarUsuario()">➕ Criar Usuário</button>
-  </div>
-
-  <!-- MASTER AÇÕES -->
-  <div id="areaMasterConfig" style="display:none">
-  <button onclick="alterarLoginMaster()">👤 Alterar login MASTER</button>
-  <button onclick="alterarSenhaMaster()">🔑 Alterar senha MASTER</button>
-</div>
-
-  <!-- GRID -->
-  <div class="grid" style="margin-top: 20px;">
-
-    <!-- ENTRADA -->
-    <div class="box">
-      <h2>ENTRADA ESTOQUE</h2>
-      <button onclick="addEntrada()">Adicionar</button>
+    <!-- ADMIN -->
+    <div id="areaAdmin" class="box" style="display:none; margin-top: 20px;">
+      <h2>Usuários Cadastrados</h2>
 
       <div class="table-scroll">
         <table>
           <thead>
             <tr>
-              <th>Data</th>
-              <th>Nome</th>
-              <th>Qtd</th>
+              <th>Usuário</th>
+              <th>Tipo</th>
               <th>Ações</th>
             </tr>
           </thead>
-          <tbody id="estoque"></tbody>
+          <tbody id="listaUsuarios"></tbody>
         </table>
       </div>
+
+      <h3 style="margin-top: 10px;">Cadastro de Usuários</h3>
+      <button type="button" onclick="criarUsuario()">➕ Criar Usuário</button>
     </div>
 
-    <!-- SAÍDA -->
-    <div class="box">
-      <h2>SAÍDA ESTOQUE</h2>
-      <button onclick="addSaida()">Adicionar</button>
+    <!-- MASTER AÇÕES -->
+    <div id="areaMasterConfig" style="display:none">
+      <button type="button" onclick="alterarLoginMaster()">👤 Alterar login MASTER</button>
+      <button type="button" onclick="alterarSenhaMaster()">🔑 Alterar senha MASTER</button>
+    </div>
 
-      <div class="table-scroll">
-        <table>
-          <thead>
-            <tr>
-              <th>Data</th>
-              <th>Nome</th>
-              <th>Qtd</th>
-              <th>Ações</th>
-            </tr>
-          </thead>
-          <tbody id="saida"></tbody>
-        </table>
+    <!-- GRID -->
+    <div class="grid" style="margin-top: 20px;">
+      <!-- ENTRADA -->
+      <div class="box">
+        <h2>ENTRADA ESTOQUE</h2>
+        <button type="button" onclick="addEntrada()">Adicionar</button>
+
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Nome</th>
+                <th>Qtd</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="estoque"></tbody>
+          </table>
+        </div>
       </div>
-    </div>
 
-    <!-- LABORATÓRIO -->
-    <div class="box">
-      <h2>LABORATÓRIO</h2>
-      <button onclick="addLaboratorio()">Adicionar</button>
+      <!-- SAÍDA -->
+      <div class="box">
+        <h2>SAÍDA ESTOQUE</h2>
+        <button type="button" onclick="addSaida()">Adicionar</button>
 
-      <div class="table-scroll">
-        <table>
-          <thead>
-            <tr>
-              <th>Data</th>
-              <th>Nome</th>
-              <th>Qtd</th>
-              <th>Ações</th>
-            </tr>
-          </thead>
-          <tbody id="laboratorio"></tbody>
-        </table>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Nome</th>
+                <th>Qtd</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="saida"></tbody>
+          </table>
+        </div>
       </div>
-    </div>
 
-    <!-- DÍVIDAS -->
-<div class="box">
-  <h2>DÍVIDAS</h2>
+      <!-- LABORATÓRIO -->
+      <div class="box">
+        <h2>LABORATÓRIO</h2>
+        <button type="button" onclick="addLaboratorio()">Adicionar</button>
 
-  <h3>Saldo: R$ <span id="totalDividas">0.00</span></h3>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Nome</th>
+                <th>Qtd</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="laboratorio"></tbody>
+          </table>
+        </div>
+      </div>
 
-  <p class="dividas-resumo">
-    Total: R$ <span id="totalDividasBruto">0.00</span>
-    &nbsp;|&nbsp;
-    Abatido: R$ <span id="totalAbatidoDividas">0.00</span>
-  </p>
+      <!-- DÍVIDAS -->
+      <div class="box">
+        <h2>DÍVIDAS</h2>
 
-  <div class="dividas-acoes">
-    <button onclick="addDivida()">Adicionar</button>
-    <button id="btnAbaterDividas" onclick="abaterDividas()">💸 Abater</button>
-  </div>
+        <h3>Saldo: R$ <span id="totalDividas">0.00</span></h3>
 
-  <div class="table-scroll">
-    <table>
-      <thead>
-        <tr>
-          <th>Data</th>
-          <th>Nome</th>
-          <th>Qtd</th>
-          <th>Valor</th>
-          <th>Ações</th>
-        </tr>
-      </thead>
-      <tbody id="dividas"></tbody>
-    </table>
-  </div>
+        <p class="dividas-resumo">
+          Total: R$ <span id="totalDividasBruto">0.00</span>
+          &nbsp;|&nbsp;
+          Abatido: R$ <span id="totalAbatidoDividas">0.00</span>
+        </p>
 
-  <h4 class="subtitulo">Pagamentos / Abatimentos</h4>
+        <div class="dividas-acoes">
+          <button type="button" onclick="addDivida()">Adicionar</button>
+          <button type="button" id="btnAbaterDividas" onclick="abaterDividas()">💸 Abater</button>
+        </div>
 
-  <div class="table-scroll">
-    <table>
-      <thead>
-        <tr>
-          <th>Data</th>
-          <th>Valor</th>
-          <th>Obs</th>
-          <th>Ações</th>
-        </tr>
-      </thead>
-      <tbody id="listaAbatimentosDividas"></tbody>
-    </table>
-  </div>
-</div>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Nome</th>
+                <th>Qtd</th>
+                <th>Valor</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="dividas"></tbody>
+          </table>
+        </div>
 
+        <h4 class="subtitulo">Pagamentos / Abatimentos</h4>
 
-<script src="./script.js.js"></script>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Valor</th>
+                <th>Obs</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="listaAbatimentosDividas"></tbody>
+          </table>
+        </div>
+      </div>
+    </div><!-- /grid -->
+  </div><!-- /sistema -->
 
+  <script src="./script.js.js"></script>
 </body>
 </html>
-
-
