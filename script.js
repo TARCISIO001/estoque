@@ -37,13 +37,20 @@ function resetarTimer() {
   }, TEMPO_LIMITE);
 }
 
+function mostrarSistemaAposLogin() {
+  // remove layout do login
+  document.body.classList.remove("login-page");
 
-function fazerLogin() 
-{
+  mostrarSistemaAposLogin();
+
+}
+
+
+function fazerLogin() {
   const usuario = document.getElementById("usuario").value.trim();
   const senha = document.getElementById("senha").value.trim();
 
-  if(!usuario || !senha){
+  if (!usuario || !senha) {
     alert("Preencha usuário e senha");
     return;
   }
@@ -53,51 +60,64 @@ function fazerLogin()
     .where("senha", "==", senha)
     .limit(1)
     .get()
-    .then(snapshot => {
+    .then((snapshot) => {
       if (snapshot.empty) {
         alert("Usuário ou senha inválidos");
         return;
       }
 
-      // salva usuário logado (COM ID)
+      // ✅ salva usuário logado (COM ID)
       usuarioLogado = {
         id: snapshot.docs[0].id,
         ...snapshot.docs[0].data()
       };
-      localStorage.setItem(
-        "usuarioLogado",
-         JSON.stringify(usuarioLogado)
-);
-      
-// troca telas
-      document.getElementById("telaLogin").style.display = "none";
 
+      localStorage.setItem("usuarioLogado", JSON.stringify(usuarioLogado));
+
+      // ✅ troca telas
+      document.getElementById("telaLogin").style.display = "none";
       document.getElementById("sistema").style.display = "block";
 
-      // área admin
-     if(usuarioLogado.tipo === "master"){
-  document.getElementById("areaAdmin").style.display = "block";
-  document.getElementById("areaLogs").style.display = "block";
-  document.getElementById("areaMasterConfig").style.display = "block";
+      // ✅ área admin
+      if (usuarioLogado.tipo === "master") {
+        document.getElementById("areaAdmin").style.display = "block";
+        document.getElementById("areaLogs").style.display = "block";
+        document.getElementById("areaMasterConfig").style.display = "block";
+        carregarUsuarios();
+        carregarLogs();
+      }
 
-
-  carregarUsuarios();
-  carregarLogs();
-}
-
-
-      // carrega dados
+      // ✅ carrega dados
       carregarEstoque();
       carregarSaida();
       carregarLaboratorio();
       carregarDividas();
       carregarAbatimentosDividas();
+
+      resetarTimer();
     })
-    .catch(err => {
+    .catch((err) => {
       console.error(err);
-      alert("Erro ao conectar com o banco");
+      alert("Erro ao conectar com o banco: " + (err?.message || err));
     });
 }
+
+
+document.addEventListener("DOMContentLoaded", () => {
+  const btn = document.getElementById("btnEntrar");
+  if (btn) btn.addEventListener("click", fazerLogin);
+
+  // Enter no teclado
+  const u = document.getElementById("usuario");
+  const s = document.getElementById("senha");
+  [u, s].forEach(el => {
+    if (!el) return;
+    el.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") fazerLogin();
+    });
+  });
+});
+
 
 
 // ======================
@@ -1156,6 +1176,12 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 
+document.addEventListener("DOMContentLoaded", () => {
+  console.log("✅ script carregado"); // serve pra confirmar no console
+
+  const btn = document.getElementById("btnEntrar");
+  if (btn) btn.addEventListener("click", fazerLogin);
+});
 
 
 
