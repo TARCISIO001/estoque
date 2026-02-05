@@ -467,5 +467,34 @@ tbody tr:hover {
 
 
 
+/* ================= DÍVIDAS (RESUMO + AÇÕES) ================= */
+.dividas-resumo{
+  text-align:center;
+  margin-bottom: 8px;
+  font-size: 14px;
+  color:#94a3b8;
+}
 
+.dividas-acoes{
+  display:flex;
+  gap:8px;
+  justify-content:center;
+  flex-wrap:wrap;
+  margin-bottom: 6px;
+}
 
+#btnAbaterDividas{
+  background:#16a34a;
+}
+#btnAbaterDividas:hover{
+  background:#15803d;
+}
+
+.subtitulo{
+  text-align:center;
+  margin-top:14px;
+  font-size:14px;
+  font-weight:600;
+  color:#e5e7eb;
+  opacity:0.9;
+}
