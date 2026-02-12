@@ -1184,6 +1184,208 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 
+async function gerarPDFRelatorio() {
+  try {
+    // Checagens básicas
+    if (!window.jspdf || !window.jspdf.jsPDF) {
+      alert("jsPDF não carregou. Confira os <script> no index.html.");
+      return;
+    }
+    if (typeof db === "undefined") {
+      alert("Firestore (db) não está disponível.");
+      return;
+    }
+    // autotable injeta pdf.autoTable(...)
+    // Se não existir, é porque a lib não foi adicionada no HTML
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF("p", "mm", "a4");
+    if (typeof pdf.autoTable !== "function") {
+      alert("AutoTable não carregou. Adicione jspdf-autotable no index.html.");
+      return;
+    }
 
+    const pageW = pdf.internal.pageSize.getWidth();
+    const marginX = 14;
 
+    // Cabeçalho
+    const hoje = new Date();
+    const dataHora = hoje.toLocaleString("pt-BR");
 
+    pdf.setFontSize(14);
+    pdf.text("RELATÓRIO - CONTROLE DE ESTOQUE", marginX, 14);
+
+    pdf.setFontSize(10);
+    pdf.text(`Gerado em: ${dataHora}`, marginX, 20);
+    pdf.text(`Usuário: ${usuarioLogado?.usuario || "-"}`, marginX, 25);
+
+    let y = 32;
+
+    // Helper: título de seção
+    function tituloSecao(txt) {
+      // quebra página se estiver muito embaixo
+      if (y > 270) {
+        pdf.addPage();
+        y = 20;
+      }
+      pdf.setFontSize(12);
+      pdf.setTextColor(0, 0, 0);
+      pdf.text(txt, marginX, y);
+      y += 6;
+    }
+
+    // Helper: tabela
+    function tabela(colunas, rows) {
+      pdf.autoTable({
+        startY: y,
+        head: [colunas],
+        body: rows,
+        margin: { left: marginX, right: marginX },
+        styles: { fontSize: 9, cellPadding: 2 },
+        headStyles: { fontSize: 9 }
+      });
+
+      y = pdf.lastAutoTable.finalY + 10;
+    }
+
+    // Helper: busca coleção ordenada e monta rows
+    async function addColecaoTabela({
+      titulo,
+      colecao,
+      colunas,
+      mapRow,
+      orderField = "dataOrdem",
+      orderDir = "desc",
+      limit = 500
+    }) {
+      tituloSecao(titulo);
+
+      let query = db.collection(colecao);
+      // Nem toda coleção pode ter dataOrdem, mas no seu sistema tem nas principais :contentReference[oaicite:3]{index=3}
+      try {
+        query = query.orderBy(orderField, orderDir);
+      } catch (e) {
+        // se não der orderBy, segue sem ordenar
+      }
+
+      const snap = await query.limit(limit).get();
+      const rows = [];
+      snap.forEach((doc) => rows.push(mapRow(doc.data(), doc.id)));
+
+      if (rows.length === 0) {
+        pdf.setFontSize(10);
+        pdf.text("Sem registros.", marginX, y);
+        y += 10;
+        return;
+      }
+
+      tabela(colunas, rows);
+    }
+
+    // =========================
+    // ENTRADA / SAÍDA / LAB
+    // =========================
+    await addColecaoTabela({
+      titulo: "ENTRADA ESTOQUE",
+      colecao: "estoque",
+      colunas: ["Data", "Material", "Qtd"],
+      mapRow: (d) => [d.data || "", d.nome || "", String(d.quantidade ?? "")]
+    });
+
+    await addColecaoTabela({
+      titulo: "SAÍDA ESTOQUE",
+      colecao: "saida",
+      colunas: ["Data", "Material", "Qtd"],
+      mapRow: (d) => [d.data || "", d.nome || "", String(d.quantidade ?? "")]
+    });
+
+    await addColecaoTabela({
+      titulo: "LABORATÓRIO",
+      colecao: "laboratorio",
+      colunas: ["Data", "Material", "Qtd"],
+      mapRow: (d) => [d.data || "", d.nome || "", String(d.quantidade ?? "")]
+    });
+
+    // =========================
+    // DÍVIDAS (com SALDO DEVEDOR em vermelho)
+    // =========================
+    tituloSecao("DÍVIDAS");
+
+    // calcula bruto (qtd * valor)
+    const snapDiv = await db.collection("dividas").get();
+    let bruto = 0;
+    const rowsDividas = [];
+    snapDiv.forEach((doc) => {
+      const d = doc.data();
+      const qtd = Number(d.quantidade ?? 0);
+      const val = Number(d.valor ?? 0);
+      const qtdOk = isNaN(qtd) ? 0 : qtd;
+      const valOk = isNaN(val) ? 0 : val;
+
+      bruto += qtdOk * valOk;
+
+      rowsDividas.push([
+        d.data || "",
+        d.nome || "",
+        String(qtdOk),
+        valOk.toFixed(2)
+      ]);
+    });
+
+    // calcula abatido
+    const snapAb = await db.collection("abatimentosDividas").get();
+    let abatido = 0;
+    const rowsAbat = [];
+    snapAb.forEach((doc) => {
+      const a = doc.data();
+      const v = Number(a.valor ?? 0);
+      const vOk = isNaN(v) ? 0 : v;
+      abatido += vOk;
+
+      rowsAbat.push([
+        a.data || "",
+        vOk.toFixed(2),
+        a.obs || ""
+      ]);
+    });
+
+    const saldo = Math.max(0, bruto - abatido);
+
+    // mostra saldo em vermelho (igual estilo do seu h3 .box h3) :contentReference[oaicite:4]{index=4}
+    if (y > 265) { pdf.addPage(); y = 20; }
+
+    pdf.setTextColor(240, 3, 3);
+    pdf.setFontSize(16);
+    pdf.text(`Saldo devedor: R$ ${saldo.toFixed(2)}`, marginX, y);
+    pdf.setTextColor(0, 0, 0);
+    pdf.setFontSize(10);
+    y += 6;
+
+    pdf.text(`Total: R$ ${bruto.toFixed(2)}   |   Abatido: R$ ${abatido.toFixed(2)}`, marginX, y);
+    y += 8;
+
+    // tabela de dívidas (se tiver)
+    if (rowsDividas.length > 0) {
+      tabela(["Data", "Nome", "Qtd", "Valor"], rowsDividas);
+    } else {
+      pdf.setFontSize(10);
+      pdf.text("Sem dívidas registradas.", marginX, y);
+      y += 10;
+    }
+
+    // tabela de abatimentos (se tiver)
+    tituloSecao("PAGAMENTOS / ABATIMENTOS");
+    if (rowsAbat.length > 0) {
+      tabela(["Data", "Valor", "Obs"], rowsAbat);
+    } else {
+      pdf.setFontSize(10);
+      pdf.text("Sem abatimentos registrados.", marginX, y);
+      y += 10;
+    }
+
+    // Salva
+    pdf.save(`relatorio_estoque_${new Date().toISOString().slice(0, 10)}.pdf`);
+  } catch (err) {
+    console.error(err);
+    alert("Erro ao gerar PDF. Veja o console (F12) para detalhes.");
+  }
+}
