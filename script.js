@@ -20,6 +20,7 @@ let usuarioLogado = null;
 let totalDividasBruto = 0;
 // total já abatido/pago
 let totalAbatidoDividas = 0;
+let dadosSistemaCarregados = false;
 
 
 // TEMPO DE INATIVIDADE PARA LOGOUT (10 minutos)
@@ -37,12 +38,396 @@ function resetarTimer() {
   }, TEMPO_LIMITE);
 }
 
-function mostrarSistemaAposLogin() {
-  // remove layout do login
+function ativarLayoutSistema() {
   document.body.classList.remove("login-page");
+}
 
-  mostrarSistemaAposLogin();
+function escaparTextoAcao(valor) {
+  return String(valor ?? "")
+    .trim()
+    .replace(/\\/g, "\\\\")
+    .replace(/'/g, "\\'")
+    .replace(/\r/g, " ")
+    .replace(/\n/g, " ");
+}
 
+
+function botaoAcao(classe, onclick, icone, texto) {
+  return `<button type="button" class="acao-btn ${classe}" onclick="${onclick}" title="${texto}" aria-label="${texto}"><span class="acao-ico">${icone}</span><span class="acao-txt">${texto}</span></button>`;
+}
+
+function botaoAcaoEstatico(classe, icone, texto) {
+  return `<span class="acao-btn ${classe} acao-static" title="${texto}" aria-label="${texto}"><span class="acao-ico">${icone}</span><span class="acao-txt">${texto}</span></span>`;
+}
+
+function linhaAcoes(botoes) {
+  return `<div class="acoes-linha">${botoes.filter(Boolean).join("")}</div>`;
+}
+
+
+
+// ======================
+// FORMULÁRIOS INTERNOS / BUSCA
+// ======================
+const CONFIG_LISTAS_MOVIMENTO = {
+  estoque: {
+    buscaId: "buscaEstoque",
+    totalId: "resumoEstoqueTotal",
+    ultimaId: "resumoEstoqueUltima",
+    contadorId: "contadorEstoqueVisivel"
+  },
+  saida: {
+    buscaId: "buscaSaida",
+    totalId: "resumoSaidaTotal",
+    ultimaId: "resumoSaidaUltima",
+    contadorId: "contadorSaidaVisivel"
+  },
+  laboratorio: {
+    buscaId: "buscaLaboratorio",
+    totalId: "resumoLaboratorioTotal",
+    ultimaId: "resumoLaboratorioUltima",
+    contadorId: "contadorLaboratorioVisivel"
+  }
+};
+
+function normalizarBusca(valor) {
+  return String(valor ?? "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim();
+}
+
+function mascaraDataCampo(campo) {
+  if (!campo) return;
+
+  const numeros = String(campo.value ?? "").replace(/\D/g, "").slice(0, 8);
+
+  if (numeros.length <= 2) {
+    campo.value = numeros;
+    return;
+  }
+
+  if (numeros.length <= 4) {
+    campo.value = `${numeros.slice(0, 2)}/${numeros.slice(2)}`;
+    return;
+  }
+
+  campo.value = `${numeros.slice(0, 2)}/${numeros.slice(2, 4)}/${numeros.slice(4)}`;
+}
+
+function preencherHoje(idCampo) {
+  const campo = document.getElementById(idCampo);
+  if (!campo) return;
+
+  const hoje = new Date();
+  const dia = String(hoje.getDate()).padStart(2, "0");
+  const mes = String(hoje.getMonth() + 1).padStart(2, "0");
+  const ano = hoje.getFullYear();
+
+  campo.value = `${dia}/${mes}/${ano}`;
+  campo.focus();
+}
+
+function alternarFormulario(idForm, idCampoInicial) {
+  const form = document.getElementById(idForm);
+  if (!form) return;
+
+  const abrir = !form.classList.contains("aberto");
+  form.classList.toggle("aberto", abrir);
+
+  if (abrir && idCampoInicial) {
+    setTimeout(() => document.getElementById(idCampoInicial)?.focus(), 80);
+  }
+}
+
+function abrirFormulario(idForm, idCampoInicial) {
+  const form = document.getElementById(idForm);
+  if (form) form.classList.add("aberto");
+  if (idCampoInicial) setTimeout(() => document.getElementById(idCampoInicial)?.focus(), 80);
+}
+
+function valorCampo(idCampo) {
+  return String(document.getElementById(idCampo)?.value ?? "").trim();
+}
+
+function focarCampo(idCampo) {
+  setTimeout(() => document.getElementById(idCampo)?.focus(), 80);
+}
+
+function mensagemFormulario(idForm, texto, tipo = "ok") {
+  const form = document.getElementById(idForm);
+  const msg = form?.querySelector(".form-mensagem");
+  if (!msg) return;
+
+  msg.textContent = texto || "";
+  msg.classList.remove("erro", "ok");
+  if (texto) msg.classList.add(tipo);
+
+  if (texto && tipo === "ok") {
+    setTimeout(() => {
+      if (msg.textContent === texto) msg.textContent = "";
+      msg.classList.remove("ok");
+    }, 3500);
+  }
+}
+
+function limparFormularioMovimento(idForm, idCampoInicial) {
+  const form = document.getElementById(idForm);
+  if (form) form.reset();
+  mensagemFormulario(idForm, "");
+  if (idCampoInicial) focarCampo(idCampoInicial);
+}
+
+function obterDataFormulario(idCampo, idForm) {
+  const campo = document.getElementById(idCampo);
+  const data = formatarData(campo?.value || "");
+
+  if (!data) {
+    focarCampo(idCampo);
+    return null;
+  }
+
+  if (!validarDataNaoFutura(data)) {
+    focarCampo(idCampo);
+    return null;
+  }
+
+  if (campo) campo.value = data;
+  mensagemFormulario(idForm, "");
+  return data;
+}
+
+function obterQuantidadeFormulario(idCampo) {
+  const valor = Number(String(document.getElementById(idCampo)?.value ?? "").replace(",", "."));
+
+  if (!Number.isFinite(valor) || valor <= 0) {
+    alert("Informe uma quantidade maior que zero.");
+    focarCampo(idCampo);
+    return null;
+  }
+
+  return valor;
+}
+
+function filtrarTabela(tbodyId, termo) {
+  const tbody = document.getElementById(tbodyId);
+  if (!tbody) return;
+
+  const busca = normalizarBusca(termo);
+
+  tbody.querySelectorAll("tr").forEach((tr) => {
+    const texto = tr.dataset.busca || normalizarBusca(tr.textContent);
+    tr.hidden = !!busca && !texto.includes(busca);
+  });
+
+  atualizarResumoLista(tbodyId);
+}
+
+function aplicarFiltroAtual(tbodyId) {
+  const cfg = CONFIG_LISTAS_MOVIMENTO[tbodyId];
+  const termo = cfg ? document.getElementById(cfg.buscaId)?.value || "" : "";
+  filtrarTabela(tbodyId, termo);
+}
+
+function atualizarResumoLista(tbodyId) {
+  const cfg = CONFIG_LISTAS_MOVIMENTO[tbodyId];
+  const tbody = document.getElementById(tbodyId);
+  if (!cfg || !tbody) return;
+
+  const linhas = Array.from(tbody.querySelectorAll("tr"));
+  const visiveis = linhas.filter((tr) => !tr.hidden);
+  const primeiraLinha = visiveis[0] || linhas[0];
+  const ultimaData = primeiraLinha?.dataset.data || "--/--/----";
+
+  const totalEl = document.getElementById(cfg.totalId);
+  const ultimaEl = document.getElementById(cfg.ultimaId);
+  const contadorEl = document.getElementById(cfg.contadorId);
+
+  if (totalEl) totalEl.textContent = linhas.length;
+  if (ultimaEl) ultimaEl.textContent = ultimaData;
+
+  if (contadorEl) {
+    if (!linhas.length) {
+      contadorEl.textContent = "0 registros";
+    } else if (visiveis.length === linhas.length) {
+      contadorEl.textContent = `${linhas.length} ${linhas.length === 1 ? "registro" : "registros"}`;
+    } else {
+      contadorEl.textContent = `${visiveis.length} de ${linhas.length} registros`;
+    }
+  }
+}
+
+function prepararLinhaMovimento(tr, item) {
+  const data = item?.data || "";
+  const nome = item?.nome || "";
+  const quantidade = Number(item?.quantidade ?? 0);
+
+  tr.dataset.data = data;
+  tr.dataset.quantidade = Number.isFinite(quantidade) ? String(quantidade) : "0";
+  tr.dataset.busca = normalizarBusca(`${data} ${nome} ${quantidade}`);
+}
+
+
+function obterDiaSemana(dataFormatada) {
+  if (!dataFormatada) return "";
+  const partes = String(dataFormatada).split("/").map(Number);
+  if (partes.length !== 3) return "";
+
+  const [dia, mes, ano] = partes;
+  const data = new Date(ano, mes - 1, dia);
+  if (
+    data.getFullYear() !== ano ||
+    data.getMonth() !== mes - 1 ||
+    data.getDate() !== dia
+  ) {
+    return "";
+  }
+
+  return data.toLocaleDateString("pt-BR", { weekday: "long" });
+}
+
+function renderDataMovimento(data) {
+  const diaSemana = obterDiaSemana(data);
+  return `
+    <div class="data-card">
+      <span class="data-icone" aria-hidden="true">🗓️</span>
+      <span class="data-principal">${data || "--/--/----"}</span>
+      ${diaSemana ? `<span class="data-dia">${diaSemana}</span>` : ""}
+    </div>
+  `;
+}
+
+function etiquetaMovimento(tipo) {
+  if (tipo === "estoque") return "📦 ENTRADA";
+  if (tipo === "saida") return "📤 SAÍDA";
+  if (tipo === "laboratorio") return "🧪 LABORATÓRIO";
+  return "📌 MATERIAL";
+}
+
+function renderMaterialMovimento(nome, tipo) {
+  return `
+    <div class="material-card">
+      <strong class="material-nome">${nome || "Sem nome"}</strong>
+      <span class="material-etiqueta">${etiquetaMovimento(tipo)}</span>
+    </div>
+  `;
+}
+
+const TELAS_SISTEMA = [
+  "telaEntrada",
+  "telaSaida",
+  "telaLaboratorio",
+  "telaDividas",
+  "telaUsuarios",
+  "telaLogs",
+  "telaConfiguracoes"
+];
+
+function usuarioEhMaster() {
+  return usuarioLogado?.tipo === "master";
+}
+
+function atualizarSaudacaoUsuario() {
+  const el = document.getElementById("saudacaoUsuario");
+  if (!el) return;
+
+  const nome = usuarioLogado?.usuario || "usuário";
+  const tipo = usuarioEhMaster() ? "MASTER" : "Usuário";
+  el.textContent = `Olá, ${nome} • ${tipo}`;
+}
+
+function aplicarPermissoesVisuais() {
+  const isMaster = usuarioEhMaster();
+
+  document.querySelectorAll("[data-master-only]").forEach((el) => {
+    el.classList.toggle("oculto-permissao", !isMaster);
+    el.style.display = isMaster ? "" : "none";
+  });
+
+  ["areaAdmin", "areaLogs", "areaMasterConfig"].forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = isMaster ? "" : "none";
+  });
+
+  document.querySelectorAll(".dividas-acoes button").forEach((btn) => {
+    btn.style.display = isMaster ? "inline-flex" : "none";
+  });
+}
+
+function mostrarMenuPrincipal() {
+  const menu = document.getElementById("menuPrincipal");
+  const btnMenu = document.getElementById("btnMenuTopo");
+
+  TELAS_SISTEMA.forEach((id) => {
+    const tela = document.getElementById(id);
+    if (tela) tela.classList.remove("ativa");
+  });
+
+  if (menu) menu.style.display = "block";
+  if (btnMenu) btnMenu.style.display = "none";
+
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function abrirTela(idTela) {
+  const telasMaster = ["telaUsuarios", "telaLogs", "telaConfiguracoes"];
+  if (telasMaster.includes(idTela) && !usuarioEhMaster()) {
+    alert("Acesso permitido somente para o MASTER.");
+    mostrarMenuPrincipal();
+    return;
+  }
+
+  const menu = document.getElementById("menuPrincipal");
+  const btnMenu = document.getElementById("btnMenuTopo");
+  const telaAlvo = document.getElementById(idTela);
+
+  if (!telaAlvo) return;
+
+  TELAS_SISTEMA.forEach((id) => {
+    const tela = document.getElementById(id);
+    if (tela) tela.classList.remove("ativa");
+  });
+
+  if (menu) menu.style.display = "none";
+  telaAlvo.classList.add("ativa");
+  if (btnMenu) btnMenu.style.display = "inline-flex";
+
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function prepararSistemaLogado() {
+  ativarLayoutSistema();
+  atualizarSaudacaoUsuario();
+  aplicarPermissoesVisuais();
+
+  const login = document.getElementById("telaLogin");
+  const sistema = document.getElementById("sistema");
+
+  if (login) login.style.display = "none";
+  if (sistema) sistema.style.display = "block";
+
+  mostrarMenuPrincipal();
+}
+
+function carregarDadosSistema() {
+  if (dadosSistemaCarregados) return;
+  dadosSistemaCarregados = true;
+
+  if (usuarioEhMaster()) {
+    carregarUsuarios();
+    carregarLogs();
+  }
+
+  carregarEstoque();
+  carregarSaida();
+  carregarLaboratorio();
+  carregarDividas();
+  carregarAbatimentosDividas();
+}
+
+function mostrarSistemaAposLogin() {
+  prepararSistemaLogado();
 }
 
 
@@ -74,26 +459,8 @@ function fazerLogin() {
 
       localStorage.setItem("usuarioLogado", JSON.stringify(usuarioLogado));
 
-      // ✅ troca telas
-      document.getElementById("telaLogin").style.display = "none";
-      document.getElementById("sistema").style.display = "block";
-
-      // ✅ área admin
-      if (usuarioLogado.tipo === "master") {
-        document.getElementById("areaAdmin").style.display = "block";
-        document.getElementById("areaLogs").style.display = "block";
-        document.getElementById("areaMasterConfig").style.display = "block";
-        carregarUsuarios();
-        carregarLogs();
-      }
-
-      // ✅ carrega dados
-      carregarEstoque();
-      carregarSaida();
-      carregarLaboratorio();
-      carregarDividas();
-      carregarAbatimentosDividas();
-
+      prepararSistemaLogado();
+      carregarDadosSistema();
       resetarTimer();
     })
     .catch((err) => {
@@ -124,74 +491,84 @@ document.addEventListener("DOMContentLoaded", () => {
 // ESTOQUE - ENTRADA
 // ======================
 function addEntrada(){
-  let data = prompt("Data (DDMMAAAA):");
-data = formatarData(data);
-if(!data) return;
-if (!validarDataNaoFutura(data)) return;
- 
-const nome = prompt("Material:");
-if(!validarNome(nome)) return;
-
-  const qtd = Number(prompt("Qtd:"));
-  if(!data || !nome || qtd <= 0) return;
-
-db.collection("estoque")
-  .add({
-    data,
-    nome,
-    quantidade: qtd,
-    dataOrdem: dataParaOrdem(data),
-    dataCriacao: firebase.firestore.FieldValue.serverTimestamp()
-  })
-
+  abrirTela("telaEntrada");
+  abrirFormulario("formEntrada", "entradaData");
 }
 
-function carregarEstoque(){
+function salvarEntradaFormulario(){
+  const formId = "formEntrada";
+  const data = obterDataFormulario("entradaData", formId);
+  if(!data) return;
+
+  const nome = valorCampo("entradaNome");
+  if(!validarNome(nome)) {
+    focarCampo("entradaNome");
+    return;
+  }
+
+  const qtd = obterQuantidadeFormulario("entradaQtd");
+  if(qtd === null) return;
+
   db.collection("estoque")
-    .orderBy("dataOrdem", "desc")
-    .onSnapshot(snapshot => {
-
-      snapshot.docChanges().forEach(change => {
-        const d = change.doc;
-        const i = d.data();
-
-        let tr = document.getElementById("estoque-" + d.id);
-
-        // REMOVER
-        if (change.type === "removed") {
-          if (tr) tr.remove();
-          return;
-        }
-
-        // CRIAR
-        if (!tr) {
-          tr = document.createElement("tr");
-          tr.id = "estoque-" + d.id;
-          estoque.prepend(tr); // novos em cima
-        }
-
-        // DESTAQUE AO ALTERAR
-        if (change.type === "modified") {
-          tr.classList.remove("tr-qtd");
-          void tr.offsetWidth;
-          tr.classList.add("tr-qtd");
-        }
-
-        tr.innerHTML = `
-          <td>${i.data}</td>
-          <td>${i.nome}</td>
-          <td>${i.quantidade}</td>
-          <td>
-            <button onclick="alterarEstoque('${d.id}',1)">➕</button>
-            <button onclick="alterarEstoque('${d.id}',-1)">➖</button>
-            <button onclick="editarNome('estoque','${d.id}','${i.nome}')">✏️</button>
-            <button onclick="excluir('estoque','${d.id}')">🗑️</button>
-          </td>
-        `;
-      });
+    .add({
+      data,
+      nome,
+      quantidade: qtd,
+      dataOrdem: dataParaOrdem(data),
+      dataCriacao: firebase.firestore.FieldValue.serverTimestamp()
+    })
+    .then(() => {
+      registrarLog(
+        "Entrada",
+        `${usuarioLogado?.usuario || "usuário"} cadastrou entrada | Material: ${nome} | Qtd: ${qtd}`
+      );
+      limparFormularioMovimento(formId, "entradaData");
+      mensagemFormulario(formId, "Entrada salva com sucesso.", "ok");
+    })
+    .catch((err) => {
+      console.error(err);
+      mensagemFormulario(formId, "Erro ao salvar entrada.", "erro");
+      alert("Erro ao salvar entrada.");
     });
 }
 
+function carregarEstoque(){
+  const estoqueEl = document.getElementById("estoque");
+  if (!estoqueEl) return;
+
+  db.collection("estoque")
+    .orderBy("dataOrdem", "desc")
+    .onSnapshot(snapshot => {
+      estoqueEl.innerHTML = "";
+
+      snapshot.forEach(d => {
+        const i = d.data() || {};
+        const tr = document.createElement("tr");
+        tr.id = "estoque-" + d.id;
+        prepararLinhaMovimento(tr, i);
+
+        const nomeSeguro = escaparTextoAcao(i.nome || "");
+
+        tr.innerHTML = `
+          <td data-label="Material">${renderMaterialMovimento(i.nome || "", "estoque")}</td>
+          <td data-label="Data">${renderDataMovimento(i.data || "")}</td>
+          <td data-label="Qtd"><span class="qtd-numero">${i.quantidade ?? ""}</span></td>
+          <td data-label="Ações">
+            ${linhaAcoes([
+              botaoAcao("acao-add", `alterarEstoque('${d.id}',1)`, "➕", "Mais"),
+              botaoAcao("acao-sub", `alterarEstoque('${d.id}',-1)`, "➖", "Menos"),
+              botaoAcao("acao-edit", `editarNome('estoque','${d.id}','${nomeSeguro}')`, "✏️", "Editar"),
+              botaoAcao("acao-delete", `excluir('estoque','${d.id}')`, "🗑️", "Excluir")
+            ])}
+          </td>
+        `;
+
+        estoqueEl.appendChild(tr);
+      });
+
+      aplicarFiltroAtual("estoque");
+    });
+}
 
 function alterarEstoque(id, v){
   const r = db.collection("estoque").doc(id);
@@ -213,98 +590,105 @@ r.update({ quantidade: n }).then(() => {
 // SAÍDA
 // ======================
 function addSaida(){
-  let data = prompt("Data (DDMMAAAA):");
-data = formatarData(data);
-if(!data) return;
-if (!validarDataNaoFutura(data)) return;
-
-  const nome = prompt("Material:");
-if(!validarNome(nome)) return;
-
-  const qtd  = Number(prompt("Qtd:"));
-  if(!data || !nome || qtd <= 0) return;
-
-  db.collection("estoque").where("nome","==",nome).limit(1).get()
-  .then(s=>{
-    if(s.empty) return alert("Não existe no estoque");
-
-    const e = s.docs[0];
-    if(e.data().quantidade < qtd) return alert("Estoque insuficiente");
-
-    db.collection("estoque").doc(e.id)
-      .update({ quantidade: e.data().quantidade - qtd });
-
-   db.collection("saida")
-  .add({
-    data,
-    nome,
-    quantidade: qtd,
-    dataOrdem: dataParaOrdem(data),
-    dataCriacao: firebase.firestore.FieldValue.serverTimestamp()
-  })
-
-  .then(() => {
-    registrarLog(
-      "Saída",
-      `Retirou ${qtd} de ${nome}`
-    );
-  });
-
-  });
+  abrirTela("telaSaida");
+  abrirFormulario("formSaida", "saidaData");
 }
 
-function carregarSaida(){
-  db.collection("saida")
-    .orderBy("dataOrdem", "desc")
-    .onSnapshot(snapshot => {
+function salvarSaidaFormulario(){
+  const formId = "formSaida";
+  const data = obterDataFormulario("saidaData", formId);
+  if(!data) return;
 
-      snapshot.docChanges().forEach(change => {
-        const d = change.doc;
-        const i = d.data();
-
-        let tr = document.getElementById("saida-" + d.id);
-
-        if (change.type === "removed") {
-          if (tr) tr.remove();
-          return;
-        }
-
-        if (!tr) {
-          tr = document.createElement("tr");
-          tr.id = "saida-" + d.id;
-          saida.prepend(tr);
-        }
-
-        if (change.type === "modified") {
-          tr.classList.remove("tr-qtd");
-          void tr.offsetWidth;
-          tr.classList.add("tr-qtd");
-        }
-
-        tr.innerHTML = `
-          <td>${i.data}</td>
-          <td>${i.nome}</td>
-          <td>${i.quantidade}</td>
-         <td>
-  <button onclick="alterarSaida('${d.id}',1)">➕</button>
-  <button onclick="alterarSaida('${d.id}',-1)">➖</button>
-  <button onclick="editarNome('saida','${d.id}','${i.nome}')">✏️</button>
-
-  ${
-    usuarioLogado?.tipo === "master"
-      ? `<button onclick="enviarParaLaboratorio('${d.id}')">🧪</button>`
-      : ""
+  const nome = valorCampo("saidaNome");
+  if(!validarNome(nome)) {
+    focarCampo("saidaNome");
+    return;
   }
 
-  <button onclick="excluir('saida','${d.id}')">🗑️</button>
-</td>
+  const qtd = obterQuantidadeFormulario("saidaQtd");
+  if(qtd === null) return;
 
-        `;
-      });
+  db.collection("estoque").where("nome","==",nome).limit(1).get()
+    .then(s=>{
+      if(s.empty) {
+        alert("Não existe no estoque");
+        focarCampo("saidaNome");
+        return null;
+      }
+
+      const e = s.docs[0];
+      const qtdEstoque = Number(e.data().quantidade ?? 0);
+      if(qtdEstoque < qtd) {
+        alert("Estoque insuficiente");
+        focarCampo("saidaQtd");
+        return null;
+      }
+
+      return db.collection("estoque").doc(e.id)
+        .update({ quantidade: qtdEstoque - qtd })
+        .then(() => db.collection("saida").add({
+          data,
+          nome,
+          quantidade: qtd,
+          dataOrdem: dataParaOrdem(data),
+          dataCriacao: firebase.firestore.FieldValue.serverTimestamp()
+        }))
+        .then(() => {
+          registrarLog(
+            "Saída",
+            `${usuarioLogado?.usuario || "usuário"} retirou ${qtd} de ${nome}`
+          );
+          limparFormularioMovimento(formId, "saidaData");
+          mensagemFormulario(formId, "Saída salva com sucesso.", "ok");
+        });
+    })
+    .catch((err) => {
+      console.error(err);
+      mensagemFormulario(formId, "Erro ao salvar saída.", "erro");
+      alert("Erro ao salvar saída.");
     });
 }
 
+function carregarSaida(){
+  const saidaEl = document.getElementById("saida");
+  if (!saidaEl) return;
 
+  db.collection("saida")
+    .orderBy("dataOrdem", "desc")
+    .onSnapshot(snapshot => {
+      saidaEl.innerHTML = "";
+
+      snapshot.forEach(d => {
+        const i = d.data() || {};
+        const tr = document.createElement("tr");
+        tr.id = "saida-" + d.id;
+        prepararLinhaMovimento(tr, i);
+
+        const nomeSeguro = escaparTextoAcao(i.nome || "");
+
+        tr.innerHTML = `
+          <td data-label="Material">${renderMaterialMovimento(i.nome || "", "saida")}</td>
+          <td data-label="Data">${renderDataMovimento(i.data || "")}</td>
+          <td data-label="Qtd"><span class="qtd-numero">${i.quantidade ?? ""}</span></td>
+          <td data-label="Ações">
+            ${linhaAcoes([
+              botaoAcao("acao-add", `alterarSaida('${d.id}',1)`, "➕", "Mais"),
+              botaoAcao("acao-sub", `alterarSaida('${d.id}',-1)`, "➖", "Menos"),
+              botaoAcao("acao-edit", `editarNome('saida','${d.id}','${nomeSeguro}')`, "✏️", "Editar"),
+              usuarioLogado?.tipo === "master"
+                ? botaoAcao("acao-lab", `enviarParaLaboratorio('${d.id}')`, "🧪", "Lab")
+                : "",
+              botaoAcao("acao-delete", `excluir('saida','${d.id}')`, "🗑️", "Excluir")
+            ])}
+          </td>
+        `;
+
+        saidaEl.appendChild(tr);
+      });
+
+      aplicarFiltroAtual("saida");
+    });
+}
 
 function alterarSaida(id, v){
   const r = db.collection("saida").doc(id);
@@ -379,67 +763,81 @@ function enviarParaLaboratorio(idSaida){
 // LABORATÓRIO (CORRIGIDO)
 // ======================
 function addLaboratorio(){
-  let data = prompt("Data (DDMMAAAA):");
-  data = formatarData(data);
+  abrirTela("telaLaboratorio");
+  abrirFormulario("formLaboratorio", "laboratorioData");
+}
+
+function salvarLaboratorioFormulario(){
+  const formId = "formLaboratorio";
+  const data = obterDataFormulario("laboratorioData", formId);
   if(!data) return;
-  if (!validarDataNaoFutura(data)) return;
 
-  const n = prompt("Nome:");
-if(!validarNome(n)) return;
+  const nome = valorCampo("laboratorioNome");
+  if(!validarNome(nome)) {
+    focarCampo("laboratorioNome");
+    return;
+  }
 
-  const q = Number(prompt("Qtd:"));
-
-  if(!n || q <= 0) return;
+  const qtd = obterQuantidadeFormulario("laboratorioQtd");
+  if(qtd === null) return;
 
   db.collection("laboratorio").add({
-  data,
-  nome: n,
-  quantidade: q,
-  dataOrdem: dataParaOrdem(data),
-  dataCriacao: firebase.firestore.FieldValue.serverTimestamp()
-});
-
+    data,
+    nome,
+    quantidade: qtd,
+    dataOrdem: dataParaOrdem(data),
+    dataCriacao: firebase.firestore.FieldValue.serverTimestamp()
+  })
+  .then(() => {
+    registrarLog(
+      "Laboratório",
+      `${usuarioLogado?.usuario || "usuário"} cadastrou laboratório | Material: ${nome} | Qtd: ${qtd}`
+    );
+    limparFormularioMovimento(formId, "laboratorioData");
+    mensagemFormulario(formId, "Laboratório salvo com sucesso.", "ok");
+  })
+  .catch((err) => {
+    console.error(err);
+    mensagemFormulario(formId, "Erro ao salvar laboratório.", "erro");
+    alert("Erro ao salvar laboratório.");
+  });
 }
+
 function carregarLaboratorio(){
+  const laboratorioEl = document.getElementById("laboratorio");
+  if (!laboratorioEl) return;
+
   db.collection("laboratorio")
     .orderBy("dataOrdem", "desc")
     .onSnapshot(snapshot => {
+      laboratorioEl.innerHTML = "";
 
-      snapshot.docChanges().forEach(change => {
-        const d = change.doc;
-        const i = d.data();
+      snapshot.forEach(d => {
+        const i = d.data() || {};
+        const tr = document.createElement("tr");
+        tr.id = "lab-" + d.id;
+        prepararLinhaMovimento(tr, i);
 
-        let tr = document.getElementById("lab-" + d.id);
-
-        if (change.type === "removed") {
-          if (tr) tr.remove();
-          return;
-        }
-
-        if (!tr) {
-          tr = document.createElement("tr");
-          tr.id = "lab-" + d.id;
-          laboratorio.prepend(tr);
-        }
-
-        if (change.type === "modified") {
-          tr.classList.remove("tr-qtd");
-          void tr.offsetWidth;
-          tr.classList.add("tr-qtd");
-        }
+        const nomeSeguro = escaparTextoAcao(i.nome || "");
 
         tr.innerHTML = `
-          <td>${i.data}</td>
-          <td>${i.nome}</td>
-          <td>${i.quantidade}</td>
-          <td>
-            <button onclick="alterarLaboratorio('${d.id}',1)">➕</button>
-            <button onclick="alterarLaboratorio('${d.id}',-1)">➖</button>
-            <button onclick="editarNome('laboratorio','${d.id}','${i.nome}')">✏️</button>
-            <button onclick="excluir('laboratorio','${d.id}')">🗑️</button>
+          <td data-label="Material">${renderMaterialMovimento(i.nome || "", "laboratorio")}</td>
+          <td data-label="Data">${renderDataMovimento(i.data || "")}</td>
+          <td data-label="Qtd"><span class="qtd-numero">${i.quantidade ?? ""}</span></td>
+          <td data-label="Ações">
+            ${linhaAcoes([
+              botaoAcao("acao-add", `alterarLaboratorio('${d.id}',1)`, "➕", "Mais"),
+              botaoAcao("acao-sub", `alterarLaboratorio('${d.id}',-1)`, "➖", "Menos"),
+              botaoAcao("acao-edit", `editarNome('laboratorio','${d.id}','${nomeSeguro}')`, "✏️", "Editar"),
+              botaoAcao("acao-delete", `excluir('laboratorio','${d.id}')`, "🗑️", "Excluir")
+            ])}
           </td>
         `;
+
+        laboratorioEl.appendChild(tr);
       });
+
+      aplicarFiltroAtual("laboratorio");
     });
 }
 
@@ -524,11 +922,13 @@ function carregarDividas(){
         const tr = document.createElement("tr");
         tr.id = "divida-" + id;
 
-        tr.innerHTML = `
-          <td>${i.data || ""}</td>
-          <td>${i.nome || ""}</td>
+        const nomeSeguro = escaparTextoAcao(i.nome || "");
 
-          <td ${
+        tr.innerHTML = `
+          <td data-label="Nome">${i.nome || ""}</td>
+          <td data-label="Data">${i.data || ""}</td>
+
+          <td data-label="Qtd" ${
             usuarioLogado?.tipo === "master"
               ? `contenteditable
                  onfocus="this.dataset.prev=this.innerText"
@@ -536,7 +936,7 @@ function carregarDividas(){
               : ""
           }>${qtdOk}</td>
 
-          <td ${
+          <td data-label="Valor" ${
             usuarioLogado?.tipo === "master"
               ? `contenteditable
                  onfocus="this.dataset.prev=this.innerText"
@@ -544,17 +944,19 @@ function carregarDividas(){
               : ""
           }>${valorOk.toFixed(2)}</td>
 
-          <td>
+          <td data-label="Ações">
             ${
               usuarioLogado?.tipo === "master"
-                ? `
-                  <button onclick="editarQtdDivida('${id}',1,true)">➕</button>
-                  <button onclick="editarQtdDivida('${id}',-1,true)">➖</button>
-                  <button onclick="editarNome('dividas','${id}','${(i.nome || "").replace(/"/g, '\\"')}')">✏️</button>
-                  <button onclick="editarValorDivida('${id}', ${valorOk})">💲</button>
-                  <button onclick="excluir('dividas','${id}')">🗑️</button>
-                `
-                : "👁️"
+                ? linhaAcoes([
+                    botaoAcao("acao-add", `editarQtdDivida('${id}',1,true)`, "➕", "Mais"),
+                    botaoAcao("acao-sub", `editarQtdDivida('${id}',-1,true)`, "➖", "Menos"),
+                    botaoAcao("acao-edit", `editarNome('dividas','${id}','${nomeSeguro}')`, "✏️", "Editar"),
+                    botaoAcao("acao-money", `editarValorDivida('${id}', ${valorOk})`, "💲", "Valor"),
+                    botaoAcao("acao-delete", `excluir('dividas','${id}')`, "🗑️", "Excluir")
+                  ])
+                : linhaAcoes([
+                    botaoAcaoEstatico("acao-view", "👁️", "Visualizar")
+                  ])
             }
           </td>
         `;
@@ -753,14 +1155,18 @@ function carregarAbatimentosDividas(){
           tr.id = "abatimento-" + id;
 
           tr.innerHTML = `
-            <td>${a.data || ""}</td>
-            <td>${valorOk.toFixed(2)}</td>
-            <td>${a.obs || ""}</td>
-            <td>
+            <td data-label="Data">${a.data || ""}</td>
+            <td data-label="Valor">${valorOk.toFixed(2)}</td>
+            <td data-label="Obs">${a.obs || ""}</td>
+            <td data-label="Ações">
               ${
                 usuarioLogado?.tipo === "master"
-                  ? `<button onclick="excluirAbatimentoDividas('${id}')">🗑️</button>`
-                  : "👁️"
+                  ? linhaAcoes([
+                      botaoAcao("acao-delete", `excluirAbatimentoDividas('${id}')`, "🗑️", "Excluir")
+                    ])
+                  : linhaAcoes([
+                      botaoAcaoEstatico("acao-view", "👁️", "Visualizar")
+                    ])
               }
             </td>
           `;
@@ -841,24 +1247,32 @@ function excluir(c, id){
 // FORMATO E VALIDAÇÃO DATA
 // ======================
 function formatarData(valor){
-  // remove qualquer coisa que não seja número
-  valor = valor.replace(/\D/g, "");
+  if (valor === null || valor === undefined) return null;
+
+  // aceita 27052026 ou 27/05/2026 e devolve sempre DD/MM/AAAA
+  valor = String(valor).replace(/\D/g, "");
 
   if(valor.length !== 8){
-    alert("Data inválida. Use o formato DDMMAAAA");
+    alert("Data inválida. Use o formato DD/MM/AAAA");
     return null;
   }
 
-  const dia  = valor.substring(0,2);
-  const mes  = valor.substring(2,4);
-  const ano  = valor.substring(4,8);
+  const dia  = Number(valor.substring(0,2));
+  const mes  = Number(valor.substring(2,4));
+  const ano  = Number(valor.substring(4,8));
 
-  if(dia < 1 || dia > 31 || mes < 1 || mes > 12){
-    alert("Data inválida");
+  const dataTeste = new Date(ano, mes - 1, dia);
+  const dataExiste =
+    dataTeste.getFullYear() === ano &&
+    dataTeste.getMonth() === mes - 1 &&
+    dataTeste.getDate() === dia;
+
+  if(!dataExiste){
+    alert("Data inválida. Confira dia, mês e ano.");
     return null;
   }
 
-  return `${dia}/${mes}/${ano}`;
+  return `${String(dia).padStart(2, "0")}/${String(mes).padStart(2, "0")}/${ano}`;
 }
 
 // FORMATAR DATA INVALIDA 
@@ -882,6 +1296,13 @@ function validarDataNaoFutura(dataFormatada) {
 
 
 function validarNome(nome){
+  nome = String(nome ?? "").trim();
+
+  if(!nome){
+    alert("Informe o nome.");
+    return false;
+  }
+
   // permite letras, números, acentos e espaços
   if(!/^[A-Za-zÀ-ÿ0-9\s]+$/.test(nome)){
     alert("Erro: o nome pode conter letras, números e espaços.");
@@ -944,10 +1365,12 @@ function carregarUsuarios(){
 
       lista.innerHTML += `
         <tr>
-          <td>${u.usuario}</td>
-          <td>${u.tipo}</td>
-          <td>
-            <button onclick="excluirUsuario('${doc.id}')">🗑️</button>
+          <td data-label="Usuário">${u.usuario}</td>
+          <td data-label="Tipo">${u.tipo}</td>
+          <td data-label="Ações">
+            ${linhaAcoes([
+              botaoAcao("acao-delete", `excluirUsuario('${doc.id}')`, "🗑️", "Excluir")
+            ])}
           </td>
         </tr>
       `;
@@ -982,26 +1405,27 @@ function carregarLogs(){
       lista.innerHTML = "";
 
       snapshot.forEach(doc => {
-  const l = doc.data();
-  let classe = "";
+        const l = doc.data();
+        let classe = "";
 
-  if(l.acao.includes("Entrada") || l.acao.includes("Aumentou")) classe = "log-add";
-  else if(l.acao.includes("Saída") || l.acao.includes("Diminuiu")) classe = "log-rem";
-  else if(l.acao.includes("Exclusão")) classe = "log-del";
-  else if(l.acao.includes("dívida")) classe = "log-divida";
+        if(l.acao.includes("Entrada") || l.acao.includes("Aumentou")) classe = "log-add";
+        else if(l.acao.includes("Saída") || l.acao.includes("Diminuiu")) classe = "log-rem";
+        else if(l.acao.includes("Exclusão")) classe = "log-del";
+        else if(l.acao.includes("dívida")) classe = "log-divida";
 
-  lista.innerHTML += `
-    <tr class="${classe}">
-      <td>${l.usuario}</td>
-      <td>${l.acao}</td>
-      <td>${l.detalhes}</td>
-      <td>${l.data}</td>
-    </tr>
-  `;
-});
+        lista.innerHTML += `
+          <tr class="${classe}">
+            <td data-label="Usuário">${l.usuario}</td>
+            <td data-label="Ação">${l.acao}</td>
+            <td data-label="Detalhes">${l.detalhes}</td>
+            <td data-label="Data">${l.data}</td>
+          </tr>
+        `;
+      });
 
     });
 }
+
 function registrarLog(acao, detalhes){
   db.collection("logs").add({
     usuario: usuarioLogado?.usuario || "desconhecido",
@@ -1014,27 +1438,6 @@ function registrarLog(acao, detalhes){
 }
 
 
-function alterarSenhaMaster(){
-  if(usuarioLogado?.tipo !== "master"){
-    alert("Acesso negado");
-    return;
-  }
-
-  const novaSenha = prompt("Digite a nova senha do MASTER:");
-  if(!novaSenha || novaSenha.length < 4){
-    alert("Senha muito curta");
-    return;
-  }
-
-  db.collection("usuarios")
-    .doc(usuarioLogado.id)
-    .update({ senha: novaSenha })
-    .then(()=>{
-      registrarLog("Segurança", "Senha do MASTER alterada");
-      alert("Senha alterada com sucesso");
-    });
-}
-/*ALTERAR LOGIN MASTER */
 function alterarLoginMaster(){
   if(usuarioLogado?.tipo !== "master"){
     alert("Acesso negado");
@@ -1053,11 +1456,11 @@ function alterarLoginMaster(){
     .then(()=>{
       registrarLog("Segurança", "Login do MASTER alterado");
       usuarioLogado.usuario = novoUsuario;
+      localStorage.setItem("usuarioLogado", JSON.stringify(usuarioLogado));
       alert("Login alterado com sucesso");
     });
 }
 
-/*ALTERAR SENHA MASTER*/
 function alterarSenhaMaster(){
   if(usuarioLogado?.tipo !== "master"){
     alert("Acesso negado");
@@ -1075,6 +1478,8 @@ function alterarSenhaMaster(){
     .update({ senha: novaSenha })
     .then(()=>{
       registrarLog("Segurança", "Senha do MASTER alterada");
+      usuarioLogado.senha = novaSenha;
+      localStorage.setItem("usuarioLogado", JSON.stringify(usuarioLogado));
       alert("Senha alterada com sucesso");
     });
 }
@@ -1115,29 +1520,15 @@ document.addEventListener("DOMContentLoaded", () => {
   const salvo = localStorage.getItem("usuarioLogado");
 
   if (salvo) {
-    usuarioLogado = JSON.parse(salvo);
-document.getElementById("telaLogin").style.display = "none";
-
-    document.getElementById("sistema").style.display = "block";
-
-    if (usuarioLogado.tipo === "master") {
-      document.getElementById("areaAdmin").style.display = "block";
-      document.getElementById("areaLogs").style.display = "block";
-      document.getElementById("areaMasterConfig").style.display = "block";
-
-      carregarUsuarios();
-      carregarLogs();
+    try {
+      usuarioLogado = JSON.parse(salvo);
+      prepararSistemaLogado();
+      carregarDadosSistema();
+      resetarTimer();
+    } catch (err) {
+      console.error("Erro ao restaurar login salvo:", err);
+      localStorage.removeItem("usuarioLogado");
     }
-
-    carregarEstoque();
-    carregarSaida();
-    carregarLaboratorio();
-    carregarDividas();
-    carregarAbatimentosDividas();
-
-
-    // 🔑 inicia o timer automático de logout
-    resetarTimer();
   }
 });
 
@@ -1152,36 +1543,6 @@ function sair() {
   location.reload();
 }
 
-// ======================
-// EXPANDIR BOX NO MOBILE
-// ======================
-document.addEventListener("DOMContentLoaded", () => {
-
-  if (window.innerWidth > 900) return; // só celular
-
-  const boxes = document.querySelectorAll(".box");
-
-  boxes.forEach(box => {
-
-    box.addEventListener("touchstart", () => {
-      // remove expansão das outras
-      boxes.forEach(b => b.classList.remove("box-ativa"));
-
-      // ativa a tocada
-      box.classList.add("box-ativa");
-    });
-
-  });
-
-});
-
-
-document.addEventListener("DOMContentLoaded", () => {
-  console.log("✅ script carregado"); // serve pra confirmar no console
-
-  const btn = document.getElementById("btnEntrar");
-  if (btn) btn.addEventListener("click", fazerLogin);
-});
 
 
 async function gerarPDFRelatorio() {
