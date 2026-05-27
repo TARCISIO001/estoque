@@ -4,207 +4,492 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Controle de Estoque</title>
-
   <link rel="stylesheet" href="style.css" />
-
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 </head>
-
 <body class="login-page">
-  <!-- LOGIN -->
   <div id="telaLogin" class="login">
     <h2>BEM VINDO AO ESTOQUE</h2>
     <input type="text" id="usuario" placeholder="Usuário" autocomplete="username" />
     <input type="password" id="senha" placeholder="Senha" autocomplete="current-password" />
     <button type="button" id="btnEntrar">Entrar</button>
-
-
   </div>
 
-  <!-- SISTEMA -->
   <div id="sistema" class="sistema" style="display:none">
-    <h1 class="titulo">
-      CONTROLE DE ESTOQUE
-      <button id="btnSair" type="button" onclick="sair()">
-        <span class="icon">🚪</span> Sair
-      </button>
-    </h1>
-
-
-<!-- exemplo de botão no topo -->
-<button type="button" onclick="gerarPDFRelatorio()">📄 Baixar PDF</button>
-
-
-
-
-
-
-    <!-- LOGS -->
-    <div id="areaLogs" class="box" style="display:none">
-      <h2>Logs de Alterações</h2>
-      <div class="table-scroll">
-        <table>
-          <thead>
-            <tr>
-              <th>Usuário</th>
-              <th>Ação</th>
-              <th>Detalhes</th>
-              <th>Data</th>
-            </tr>
-          </thead>
-          <tbody id="listaLogs"></tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- ADMIN -->
-    <div id="areaAdmin" class="box" style="display:none; margin-top: 20px;">
-      <h2>Usuários Cadastrados</h2>
-
-      <div class="table-scroll">
-        <table>
-          <thead>
-            <tr>
-              <th>Usuário</th>
-              <th>Tipo</th>
-              <th>Ações</th>
-            </tr>
-          </thead>
-          <tbody id="listaUsuarios"></tbody>
-        </table>
+    <header class="topo-sistema">
+      <div class="topo-identidade">
+        <p id="saudacaoUsuario" class="saudacao-usuario">Olá</p>
+        <h1 class="titulo">CONTROLE DE ESTOQUE</h1>
       </div>
 
-      <h3 style="margin-top: 10px;">Cadastro de Usuários</h3>
-      <button type="button" onclick="criarUsuario()">➕ Criar Usuário</button>
-    </div>
+      <div class="topo-acoes">
+        <button type="button" id="btnMenuTopo" class="btn-menu-topo" onclick="mostrarMenuPrincipal()">🏠 Menu</button>
+        <button type="button" id="btnPdf" onclick="gerarPDFRelatorio()">📄 Baixar PDF</button>
+        <button id="btnSair" type="button" onclick="sair()">
+          <span class="icon">🚪</span>
+          <span>Sair</span>
+        </button>
+      </div>
+    </header>
 
-    <!-- MASTER AÇÕES -->
-    <div id="areaMasterConfig" style="display:none">
-      <button type="button" onclick="alterarLoginMaster()">👤 Alterar login MASTER</button>
-      <button type="button" onclick="alterarSenhaMaster()">🔑 Alterar senha MASTER</button>
-    </div>
-
-    <!-- GRID -->
-    <div class="grid" style="margin-top: 20px;">
-      <!-- ENTRADA -->
-      <div class="box">
-        <h2>ENTRADA ESTOQUE</h2>
-        <button type="button" onclick="addEntrada()">Adicionar</button>
-
-        <div class="table-scroll">
-          <table>
-            <thead>
-              <tr>
-                <th>Data</th>
-                <th>Nome</th>
-                <th>Qtd</th>
-                <th>Ações</th>
-              </tr>
-            </thead>
-            <tbody id="estoque"></tbody>
-          </table>
-        </div>
+    <section id="menuPrincipal" class="menu-principal">
+      <div class="menu-hero">
+        <span class="menu-etiqueta">Menu principal</span>
+        <h2>O que você deseja acessar?</h2>
+        <p>Escolha uma área para abrir somente a tela que precisa usar. No celular fica mais limpo e fácil de mexer.</p>
       </div>
 
-      <!-- SAÍDA -->
-      <div class="box">
-        <h2>SAÍDA ESTOQUE</h2>
-        <button type="button" onclick="addSaida()">Adicionar</button>
+      <div class="menu-grid">
+        <button type="button" class="menu-card card-entrada" onclick="abrirTela('telaEntrada')">
+          <span class="menu-icone">📦</span>
+          <span class="menu-titulo">Entrada de Estoque</span>
+          <span class="menu-texto">Cadastrar materiais e ajustar quantidades.</span>
+        </button>
 
-        <div class="table-scroll">
-          <table>
-            <thead>
-              <tr>
-                <th>Data</th>
-                <th>Nome</th>
-                <th>Qtd</th>
-                <th>Ações</th>
-              </tr>
-            </thead>
-            <tbody id="saida"></tbody>
-          </table>
-        </div>
+        <button type="button" class="menu-card card-saida" onclick="abrirTela('telaSaida')">
+          <span class="menu-icone">📤</span>
+          <span class="menu-titulo">Saída de Estoque</span>
+          <span class="menu-texto">Registrar retiradas e enviar para laboratório.</span>
+        </button>
+
+        <button type="button" class="menu-card card-laboratorio" onclick="abrirTela('telaLaboratorio')">
+          <span class="menu-icone">🧪</span>
+          <span class="menu-titulo">Laboratório</span>
+          <span class="menu-texto">Acompanhar materiais separados para laboratório.</span>
+        </button>
+
+        <button type="button" class="menu-card card-dividas" onclick="abrirTela('telaDividas')">
+          <span class="menu-icone">💰</span>
+          <span class="menu-titulo">Dívidas</span>
+          <span class="menu-texto">Ver saldo, valores e pagamentos/abatimentos.</span>
+        </button>
+
+        <button type="button" class="menu-card card-pdf" onclick="gerarPDFRelatorio()">
+          <span class="menu-icone">📄</span>
+          <span class="menu-titulo">Relatório PDF</span>
+          <span class="menu-texto">Baixar relatório completo do controle.</span>
+        </button>
+
+        <button type="button" class="menu-card card-usuarios" data-master-only onclick="abrirTela('telaUsuarios')">
+          <span class="menu-icone">👥</span>
+          <span class="menu-titulo">Usuários</span>
+          <span class="menu-texto">Criar e excluir usuários cadastrados.</span>
+        </button>
+
+        <button type="button" class="menu-card card-logs" data-master-only onclick="abrirTela('telaLogs')">
+          <span class="menu-icone">🧾</span>
+          <span class="menu-titulo">Logs de Alterações</span>
+          <span class="menu-texto">Conferir histórico de alterações do sistema.</span>
+        </button>
+
+        <button type="button" class="menu-card card-config" data-master-only onclick="abrirTela('telaConfiguracoes')">
+          <span class="menu-icone">⚙️</span>
+          <span class="menu-titulo">Configurações</span>
+          <span class="menu-texto">Alterar login e senha do MASTER.</span>
+        </button>
       </div>
+    </section>
 
-      <!-- LABORATÓRIO -->
-      <div class="box">
-        <h2>LABORATÓRIO</h2>
-        <button type="button" onclick="addLaboratorio()">Adicionar</button>
-
-        <div class="table-scroll">
-          <table>
-            <thead>
-              <tr>
-                <th>Data</th>
-                <th>Nome</th>
-                <th>Qtd</th>
-                <th>Ações</th>
-              </tr>
-            </thead>
-            <tbody id="laboratorio"></tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- DÍVIDAS -->
-      <div class="box">
-        <h2>DÍVIDAS</h2>
-
-        <h3>Saldo Devedor: R$ <span id="totalDividas">0.00</span></h3>
-
-        <p class="dividas-resumo">
-          Total: R$ <span id="totalDividasBruto">0.00</span>
-          &nbsp;|&nbsp;
-          Abatido: R$ <span id="totalAbatidoDividas">0.00</span>
-        </p>
-
-        <div class="dividas-acoes">
-          <button type="button" onclick="addDivida()">Adicionar</button>
-          <button type="button" id="btnAbaterDividas" onclick="abaterDividas()">💸 Abater</button>
+    <main id="areaTelas" class="area-telas">
+      <section id="telaEntrada" class="tela-conteudo">
+        <div class="tela-cabecalho">
+          <button type="button" class="btn-voltar" onclick="mostrarMenuPrincipal()">← Voltar ao menu</button>
+          <div>
+            <span class="tela-etiqueta">📦 Estoque</span>
+            <h2>Entrada de Estoque</h2>
+            <p>Adicione materiais que entraram e ajuste a quantidade quando precisar.</p>
+          </div>
         </div>
 
-        <div class="table-scroll">
-          <table>
-            <thead>
-              <tr>
-                <th>Data</th>
-                <th>Nome</th>
-                <th>Qtd</th>
-                <th>Valor</th>
-                <th>Ações</th>
-              </tr>
-            </thead>
-            <tbody id="dividas"></tbody>
-          </table>
+        <div class="box estoque modulo-lancamentos">
+          <div class="section-toolbar painel-titulo">
+            <h2>Entrada Estoque</h2>
+            <button type="button" class="btn-novo-registro" onclick="alternarFormulario('formEntrada', 'entradaData')">➕ Novo lançamento</button>
+          </div>
+
+          <div class="resumo-cards">
+            <div class="mini-card">
+              <span>Total de registros</span>
+              <strong id="resumoEstoqueTotal">0</strong>
+            </div>
+            <div class="mini-card">
+              <span>Última entrada</span>
+              <strong id="resumoEstoqueUltima">--/--/----</strong>
+            </div>
+          </div>
+
+          <form id="formEntrada" class="form-lancamento aberto" onsubmit="event.preventDefault(); salvarEntradaFormulario();">
+            <div class="form-topo">
+              <div>
+                <strong>Adicionar nova entrada</strong>
+                <span>Digite a data no padrão DD/MM/AAAA.</span>
+              </div>
+              <button type="button" class="btn-fechar-form" onclick="alternarFormulario('formEntrada', 'entradaData')">Ocultar</button>
+            </div>
+
+            <div class="campos-grid">
+              <label class="campo-form">
+                <span>Data</span>
+                <input type="text" id="entradaData" placeholder="__/__/____" maxlength="10" inputmode="numeric" autocomplete="off" oninput="mascaraDataCampo(this)" />
+              </label>
+
+              <label class="campo-form">
+                <span>Material</span>
+                <input type="text" id="entradaNome" placeholder="Ex: Luva, Reagente, Frasco" autocomplete="off" />
+              </label>
+
+              <label class="campo-form">
+                <span>Quantidade</span>
+                <input type="number" id="entradaQtd" min="1" step="1" placeholder="0" />
+              </label>
+            </div>
+
+            <div class="form-acoes">
+              <button type="button" class="btn-secundario" onclick="preencherHoje('entradaData')">Usar data de hoje</button>
+              <button type="reset" class="btn-secundario">Limpar</button>
+              <button type="submit" class="btn-salvar">Salvar entrada</button>
+            </div>
+            <p class="form-mensagem" aria-live="polite"></p>
+          </form>
+
+          <div class="lista-topo">
+            <label class="campo-busca">
+              <span>Buscar material</span>
+              <input type="search" id="buscaEstoque" placeholder="Digite para filtrar a lista..." oninput="filtrarTabela('estoque', this.value)" />
+            </label>
+            <span id="contadorEstoqueVisivel" class="contador-lista">0 registros</span>
+          </div>
+
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nome</th>
+                  <th>Data</th>
+                  <th>Qtd</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody id="estoque"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section id="telaSaida" class="tela-conteudo">
+        <div class="tela-cabecalho">
+          <button type="button" class="btn-voltar" onclick="mostrarMenuPrincipal()">← Voltar ao menu</button>
+          <div>
+            <span class="tela-etiqueta">📤 Movimentação</span>
+            <h2>Saída de Estoque</h2>
+            <p>Registre materiais retirados do estoque e acompanhe as baixas.</p>
+          </div>
         </div>
 
-        <h4 class="subtitulo">Pagamentos / Abatimentos</h4>
+        <div class="box saida modulo-lancamentos">
+          <div class="section-toolbar painel-titulo">
+            <h2>Saída Estoque</h2>
+            <button type="button" class="btn-novo-registro" onclick="alternarFormulario('formSaida', 'saidaData')">➕ Novo lançamento</button>
+          </div>
 
-        <div class="table-scroll">
-          <table>
-            <thead>
-              <tr>
-                <th>Data</th>
-                <th>Valor</th>
-                <th>Obs</th>
-                <th>Ações</th>
-              </tr>
-            </thead>
-            <tbody id="listaAbatimentosDividas"></tbody>
-          </table>
+          <div class="resumo-cards">
+            <div class="mini-card">
+              <span>Total de saídas</span>
+              <strong id="resumoSaidaTotal">0</strong>
+            </div>
+            <div class="mini-card">
+              <span>Última saída</span>
+              <strong id="resumoSaidaUltima">--/--/----</strong>
+            </div>
+          </div>
+
+          <form id="formSaida" class="form-lancamento aberto" onsubmit="event.preventDefault(); salvarSaidaFormulario();">
+            <div class="form-topo">
+              <div>
+                <strong>Adicionar nova saída</strong>
+                <span>A saída baixa a quantidade do estoque.</span>
+              </div>
+              <button type="button" class="btn-fechar-form" onclick="alternarFormulario('formSaida', 'saidaData')">Ocultar</button>
+            </div>
+
+            <p class="aviso-form">O sistema avisa se o material não existir ou se a quantidade for maior que o estoque disponível.</p>
+
+            <div class="campos-grid">
+              <label class="campo-form">
+                <span>Data</span>
+                <input type="text" id="saidaData" placeholder="__/__/____" maxlength="10" inputmode="numeric" autocomplete="off" oninput="mascaraDataCampo(this)" />
+              </label>
+
+              <label class="campo-form">
+                <span>Material</span>
+                <input type="text" id="saidaNome" placeholder="Nome igual ao cadastro de entrada" autocomplete="off" />
+              </label>
+
+              <label class="campo-form">
+                <span>Quantidade</span>
+                <input type="number" id="saidaQtd" min="1" step="1" placeholder="0" />
+              </label>
+            </div>
+
+            <div class="form-acoes">
+              <button type="button" class="btn-secundario" onclick="preencherHoje('saidaData')">Usar data de hoje</button>
+              <button type="reset" class="btn-secundario">Limpar</button>
+              <button type="submit" class="btn-salvar">Salvar saída</button>
+            </div>
+            <p class="form-mensagem" aria-live="polite"></p>
+          </form>
+
+          <div class="lista-topo">
+            <label class="campo-busca">
+              <span>Buscar material</span>
+              <input type="search" id="buscaSaida" placeholder="Digite para filtrar a lista..." oninput="filtrarTabela('saida', this.value)" />
+            </label>
+            <span id="contadorSaidaVisivel" class="contador-lista">0 registros</span>
+          </div>
+
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nome</th>
+                  <th>Data</th>
+                  <th>Qtd</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody id="saida"></tbody>
+            </table>
+          </div>
         </div>
-      </div>
-    </div><!-- /grid -->
-  </div><!-- /sistema -->
+      </section>
 
+      <section id="telaLaboratorio" class="tela-conteudo">
+        <div class="tela-cabecalho">
+          <button type="button" class="btn-voltar" onclick="mostrarMenuPrincipal()">← Voltar ao menu</button>
+          <div>
+            <span class="tela-etiqueta">🧪 Laboratório</span>
+            <h2>Laboratório</h2>
+            <p>Controle os itens enviados ou cadastrados para o laboratório.</p>
+          </div>
+        </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+        <div class="box laboratorio modulo-lancamentos">
+          <div class="section-toolbar painel-titulo">
+            <h2>Laboratório</h2>
+            <button type="button" class="btn-novo-registro" onclick="alternarFormulario('formLaboratorio', 'laboratorioData')">➕ Novo lançamento</button>
+          </div>
 
+          <div class="resumo-cards">
+            <div class="mini-card">
+              <span>Total no laboratório</span>
+              <strong id="resumoLaboratorioTotal">0</strong>
+            </div>
+            <div class="mini-card">
+              <span>Último lançamento</span>
+              <strong id="resumoLaboratorioUltima">--/--/----</strong>
+            </div>
+          </div>
 
+          <form id="formLaboratorio" class="form-lancamento aberto" onsubmit="event.preventDefault(); salvarLaboratorioFormulario();">
+            <div class="form-topo">
+              <div>
+                <strong>Adicionar ao laboratório</strong>
+                <span>Use a data no padrão DD/MM/AAAA.</span>
+              </div>
+              <button type="button" class="btn-fechar-form" onclick="alternarFormulario('formLaboratorio', 'laboratorioData')">Ocultar</button>
+            </div>
 
-<script src="./script.js"></script>
+            <div class="campos-grid">
+              <label class="campo-form">
+                <span>Data</span>
+                <input type="text" id="laboratorioData" placeholder="__/__/____" maxlength="10" inputmode="numeric" autocomplete="off" oninput="mascaraDataCampo(this)" />
+              </label>
 
+              <label class="campo-form">
+                <span>Material</span>
+                <input type="text" id="laboratorioNome" placeholder="Ex: Amostra, Reagente, Material" autocomplete="off" />
+              </label>
+
+              <label class="campo-form">
+                <span>Quantidade</span>
+                <input type="number" id="laboratorioQtd" min="1" step="1" placeholder="0" />
+              </label>
+            </div>
+
+            <div class="form-acoes">
+              <button type="button" class="btn-secundario" onclick="preencherHoje('laboratorioData')">Usar data de hoje</button>
+              <button type="reset" class="btn-secundario">Limpar</button>
+              <button type="submit" class="btn-salvar">Salvar laboratório</button>
+            </div>
+            <p class="form-mensagem" aria-live="polite"></p>
+          </form>
+
+          <div class="lista-topo">
+            <label class="campo-busca">
+              <span>Buscar material</span>
+              <input type="search" id="buscaLaboratorio" placeholder="Digite para filtrar a lista..." oninput="filtrarTabela('laboratorio', this.value)" />
+            </label>
+            <span id="contadorLaboratorioVisivel" class="contador-lista">0 registros</span>
+          </div>
+
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nome</th>
+                  <th>Data</th>
+                  <th>Qtd</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody id="laboratorio"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section id="telaDividas" class="tela-conteudo">
+        <div class="tela-cabecalho">
+          <button type="button" class="btn-voltar" onclick="mostrarMenuPrincipal()">← Voltar ao menu</button>
+          <div>
+            <span class="tela-etiqueta">💰 Financeiro</span>
+            <h2>Dívidas</h2>
+            <p>Veja o saldo devedor, registre dívidas e confira os pagamentos/abatimentos.</p>
+          </div>
+        </div>
+
+        <div class="box dividas">
+          <h2>Dívidas</h2>
+
+          <h3>Saldo Devedor: R$ <span id="totalDividas">0.00</span></h3>
+
+          <p class="dividas-resumo">
+            <span>Total: R$ <strong id="totalDividasBruto">0.00</strong></span>
+            <span class="divisor">•</span>
+            <span>Abatido: R$ <strong id="totalAbatidoDividas">0.00</strong></span>
+          </p>
+
+          <div class="dividas-acoes">
+            <button type="button" onclick="addDivida()">➕ Adicionar</button>
+            <button type="button" id="btnAbaterDividas" onclick="abaterDividas()">💸 Abater</button>
+          </div>
+
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nome</th>
+                  <th>Data</th>
+                  <th>Qtd</th>
+                  <th>Valor</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody id="dividas"></tbody>
+            </table>
+          </div>
+
+          <h4 class="subtitulo">Pagamentos / Abatimentos</h4>
+
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Data</th>
+                  <th>Valor</th>
+                  <th>Obs</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody id="listaAbatimentosDividas"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section id="telaUsuarios" class="tela-conteudo" data-master-only>
+        <div class="tela-cabecalho">
+          <button type="button" class="btn-voltar" onclick="mostrarMenuPrincipal()">← Voltar ao menu</button>
+          <div>
+            <span class="tela-etiqueta">👥 Administração</span>
+            <h2>Usuários</h2>
+            <p>Área exclusiva do MASTER para criar e excluir usuários.</p>
+          </div>
+        </div>
+
+        <div id="areaAdmin" class="box admin" style="display:none">
+          <div class="section-toolbar">
+            <h2>Usuários Cadastrados</h2>
+            <button type="button" onclick="criarUsuario()">➕ Criar Usuário</button>
+          </div>
+
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Usuário</th>
+                  <th>Tipo</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody id="listaUsuarios"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section id="telaLogs" class="tela-conteudo" data-master-only>
+        <div class="tela-cabecalho">
+          <button type="button" class="btn-voltar" onclick="mostrarMenuPrincipal()">← Voltar ao menu</button>
+          <div>
+            <span class="tela-etiqueta">🧾 Auditoria</span>
+            <h2>Logs de Alterações</h2>
+            <p>Histórico das principais alterações feitas dentro do sistema.</p>
+          </div>
+        </div>
+
+        <div id="areaLogs" class="box logs" style="display:none">
+          <h2>Logs de Alterações</h2>
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Usuário</th>
+                  <th>Ação</th>
+                  <th>Detalhes</th>
+                  <th>Data</th>
+                </tr>
+              </thead>
+              <tbody id="listaLogs"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section id="telaConfiguracoes" class="tela-conteudo" data-master-only>
+        <div class="tela-cabecalho">
+          <button type="button" class="btn-voltar" onclick="mostrarMenuPrincipal()">← Voltar ao menu</button>
+          <div>
+            <span class="tela-etiqueta">⚙️ Segurança</span>
+            <h2>Configurações do MASTER</h2>
+            <p>Altere o login e a senha do administrador principal.</p>
+          </div>
+        </div>
+
+        <div class="box admin">
+          <h2>Configurações</h2>
+          <div id="areaMasterConfig" class="acoes-master" style="display:none">
+            <button type="button" onclick="alterarLoginMaster()">👤 Alterar login MASTER</button>
+            <button type="button" onclick="alterarSenhaMaster()">🔑 Alterar senha MASTER</button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+  <script src="./script.js"></script>
 </body>
 </html>
